@@ -69,13 +69,13 @@ export class NewsService {
 
     this.news[indexOfNews] = updatedNews;
 
-    return 'Новость отредактирована.';
+    return `Новость c id ${id} отредактирована.`;
   }
 
   remove(id: string): string {
     const indexOfNews = this.findNewsIndex(id);
     this.news.splice(indexOfNews, 1);
 
-    return 'Новость удалена.';
+    return `Новость c id ${id} удалена.`;
   }
 }

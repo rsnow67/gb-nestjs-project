@@ -15,7 +15,7 @@ import { NewsService } from './news.service';
 export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
-  @Get()
+  @Get('all')
   getAll() {
     return this.newsService.findAll();
   }
@@ -27,7 +27,7 @@ export class NewsController {
 
   @Post()
   create(@Body() news: CreateNewsDto) {
-    this.newsService.create(news);
+    return this.newsService.create(news);
   }
 
   @Patch(':id')
@@ -37,6 +37,6 @@ export class NewsController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    this.newsService.remove(id);
+    return this.newsService.remove(id);
   }
 }
