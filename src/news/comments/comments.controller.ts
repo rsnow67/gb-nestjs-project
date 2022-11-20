@@ -17,7 +17,7 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Get(':newsId')
-  getAll(@Param('newsId') newsId: string): Comment[] {
+  getAll(@Param('newsId') newsId: string): Comment[] | string {
     return this.commentsService.findAll(newsId);
   }
 

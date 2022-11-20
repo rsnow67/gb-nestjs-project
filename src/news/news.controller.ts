@@ -8,6 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { renderNewsAll } from 'src/view/news/news-all';
+import { renderDetailNews } from 'src/view/news/news-detail';
 import { renderTemplate } from 'src/view/template';
 import { CommentsService } from './comments/comments.service';
 import { CreateNewsDto } from './dto/create-news-dto';
@@ -45,6 +46,23 @@ export class NewsController {
     return renderTemplate(content, {
       title: 'Список новостей',
       description: 'Самые крутые новости на свете',
+    });
+  }
+
+  @Get(':id/detail')
+  getDetailView(@Param('id') id: string) {
+    const news = this.newsService.findOne(id);
+    let comments = this.commentsService.findAll(id);
+
+    if (!Array.isArray(comments)) {
+      comments = [];
+    }
+
+    const content = renderDetailNews(news, comments);
+
+    return renderTemplate(content, {
+      title: news.title,
+      description: news.description,
     });
   }
 

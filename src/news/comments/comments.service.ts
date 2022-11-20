@@ -21,11 +21,11 @@ export class CommentsService {
     ],
   };
 
-  findAll(newsId: string): Comment[] {
+  findAll(newsId: string): Comment[] | string {
     const comments = this.comments?.[newsId];
 
     if (!comments || !comments.length) {
-      throw new HttpException('Комментарии не найдены.', 500);
+      return 'Комментарии не найдены.';
     }
 
     return comments;
@@ -33,9 +33,11 @@ export class CommentsService {
 
   findOne(newsId: string, commentId: string): Comment {
     const comments = this.findAll(newsId);
-    const comment = comments.length
-      ? comments.find((comment) => comment.id === commentId)
-      : null;
+    let comment = null;
+
+    if (Array.isArray(comments) && comments.length > 0) {
+      comment = comments.find((comment) => comment.id === commentId);
+    }
 
     if (!comment) {
       throw new HttpException('Комментарий не найден.', 500);
