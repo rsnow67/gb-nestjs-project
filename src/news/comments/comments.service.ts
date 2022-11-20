@@ -2,6 +2,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { Comment, Comments } from './comments.interface';
 import { CreateCommentDto } from './dto/create-comment-dto';
 import { v4 as uuidv4 } from 'uuid';
+import { UpdateCommentDto } from './dto/update-comment-dto';
 
 @Injectable()
 export class CommentsService {
@@ -51,13 +52,30 @@ export class CommentsService {
     }
 
     const comment = {
-      ...createCommentDto,
       id: uuidv4(),
+      ...createCommentDto,
     };
 
     this.comments[newsId].push(comment);
 
     return 'Комментарий создан.';
+  }
+
+  update(
+    newsId: string,
+    commentId: string,
+    updateCommentDto: UpdateCommentDto,
+  ) {
+    const comment = this.findOne(newsId, commentId);
+    const commentIndex = this.comments[newsId].indexOf(comment);
+    const updateComment = {
+      ...comment,
+      ...updateCommentDto,
+    };
+
+    this.comments[newsId][commentIndex] = updateComment;
+
+    return `Комментарий отредактирован.`;
   }
 
   removeAll(newsId: string): string {
@@ -69,12 +87,10 @@ export class CommentsService {
   }
 
   remove(newsId: string, commentId: string) {
-    const comments = this.findAll(newsId);
-    const commentIndex = comments.findIndex(
-      (comment) => comment.id === commentId,
-    );
+    const comment = this.findOne(newsId, commentId);
+    const commentIndex = this.comments[newsId].indexOf(comment);
 
-    comments.splice(commentIndex, 1);
+    this.comments[newsId].splice(commentIndex, 1);
 
     return 'Комментарий удален.';
   }
