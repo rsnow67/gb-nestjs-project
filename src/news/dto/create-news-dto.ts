@@ -17,6 +17,11 @@ export class CreateNewsDto {
   @IsNotEmpty()
   author: string;
 
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  cover: string;
+
   @ApiPropertyOptional()
   @IsNumber()
   @IsOptional()
