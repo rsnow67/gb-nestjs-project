@@ -42,26 +42,15 @@ export class NewsService {
     const news = this.news.find((news) => news.id === id);
 
     if (!news) {
-      throw new HttpException('Новость с таким id не найдена.', 500);
+      throw new HttpException('Новость не найдена.', 500);
     }
 
     return news;
   }
 
-  private findNewsIndex(id: string) {
-    const indexOfNews = this.news.findIndex((news) => news.id === id);
-
-    if (indexOfNews < 0) {
-      throw new HttpException('Новость с таким id не найдена.', 500);
-    }
-
-    return indexOfNews;
-  }
-
   update(id: string, updateNewsDto: UpdateNewsDto) {
-    console.log(id);
-    const indexOfNews = this.findNewsIndex(id);
-    const news = this.news[indexOfNews];
+    const news = this.findOne(id);
+    const indexOfNews = this.news.indexOf(news);
     const updatedNews = {
       ...news,
       ...updateNewsDto,
@@ -69,13 +58,15 @@ export class NewsService {
 
     this.news[indexOfNews] = updatedNews;
 
-    return `Новость c id ${id} отредактирована.`;
+    return `Новость отредактирована.`;
   }
 
   remove(id: string): string {
-    const indexOfNews = this.findNewsIndex(id);
+    const news = this.findOne(id);
+    const indexOfNews = this.news.indexOf(news);
+
     this.news.splice(indexOfNews, 1);
 
-    return `Новость c id ${id} удалена.`;
+    return `Новость удалена.`;
   }
 }
