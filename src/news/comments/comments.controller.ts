@@ -17,7 +17,7 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Get(':newsId')
-  getAll(@Param('newsId') newsId: string): Comment[] | string {
+  getAll(@Param('newsId') newsId: string): Comment[] {
     return this.commentsService.findAll(newsId);
   }
 
@@ -29,11 +29,20 @@ export class CommentsController {
     return this.commentsService.findOne(newsId, commentId);
   }
 
-  @Post(':newsId')
+  @Post(':newsId/:commentId')
   create(
     @Param('newsId') newsId: string,
+    @Param('commentId') commentId: string,
     @Body() createCommentDto: CreateCommentDto,
   ): string {
+    if (typeof commentId === 'string' && commentId !== ':commentId') {
+      return this.commentsService.createReply(
+        newsId,
+        commentId,
+        createCommentDto,
+      );
+    }
+
     return this.commentsService.create(newsId, createCommentDto);
   }
 
@@ -42,7 +51,7 @@ export class CommentsController {
     @Param('newsId') newsId: string,
     @Param('commentId') commentId: string,
     @Body() updateCommentDto: UpdateCommentDto,
-  ) {
+  ): string {
     return this.commentsService.update(newsId, commentId, updateCommentDto);
   }
 

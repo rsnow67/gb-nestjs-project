@@ -21,11 +21,11 @@ export class CommentsService {
     ],
   };
 
-  findAll(newsId: string): Comment[] | string {
+  findAll(newsId: string): Comment[] {
     const comments = this.comments?.[newsId];
 
     if (!comments || !comments.length) {
-      return 'Комментарии не найдены.';
+      return [];
     }
 
     return comments;
@@ -35,7 +35,7 @@ export class CommentsService {
     const comments = this.findAll(newsId);
     let comment = null;
 
-    if (Array.isArray(comments) && comments.length > 0) {
+    if (comments.length > 0) {
       comment = comments.find((comment) => comment.id === commentId);
     }
 
@@ -63,11 +63,32 @@ export class CommentsService {
     return 'Комментарий создан.';
   }
 
+  createReply(
+    newsId: string,
+    commentId: string,
+    createCommentDto: CreateCommentDto,
+  ): string {
+    const comment = this.findOne(newsId, commentId);
+
+    if (!comment.replies) {
+      comment.replies = [];
+    }
+
+    const reply = {
+      id: uuidv4(),
+      ...createCommentDto,
+    };
+
+    comment.replies.push(reply);
+
+    return 'Ответ на комментарий создан.';
+  }
+
   update(
     newsId: string,
     commentId: string,
     updateCommentDto: UpdateCommentDto,
-  ) {
+  ): string {
     const comment = this.findOne(newsId, commentId);
     const commentIndex = this.comments[newsId].indexOf(comment);
     const updateComment = {
