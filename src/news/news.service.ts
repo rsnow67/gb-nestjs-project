@@ -13,6 +13,8 @@ export class NewsService {
       description: 'text',
       author: 'Vadim',
       countView: 12,
+      cover:
+        'https://i.pinimg.com/736x/f4/d2/96/f4d2961b652880be432fb9580891ed62.jpg',
     },
     {
       id: '2',
@@ -20,13 +22,15 @@ export class NewsService {
       description: 'text',
       author: 'Vadim',
       countView: 0,
+      cover:
+        'https://ichef.bbci.co.uk/news/640/cpsprodpb/14A82/production/_116301648_gettyimages-1071204136.jpg',
     },
   ];
 
   create(createNewsDto: CreateNewsDto): string {
     const news: News = {
-      ...createNewsDto,
       id: uuidv4(),
+      ...createNewsDto,
     };
 
     this.news.push(news);
@@ -42,26 +46,15 @@ export class NewsService {
     const news = this.news.find((news) => news.id === id);
 
     if (!news) {
-      throw new HttpException('Новость с таким id не найдена.', 500);
+      throw new HttpException('Новость не найдена.', 500);
     }
 
     return news;
   }
 
-  private findNewsIndex(id: string) {
-    const indexOfNews = this.news.findIndex((news) => news.id === id);
-
-    if (indexOfNews < 0) {
-      throw new HttpException('Новость с таким id не найдена.', 500);
-    }
-
-    return indexOfNews;
-  }
-
-  update(id: string, updateNewsDto: UpdateNewsDto) {
-    console.log(id);
-    const indexOfNews = this.findNewsIndex(id);
-    const news = this.news[indexOfNews];
+  update(id: string, updateNewsDto: UpdateNewsDto): string {
+    const news = this.findOne(id);
+    const indexOfNews = this.news.indexOf(news);
     const updatedNews = {
       ...news,
       ...updateNewsDto,
@@ -69,13 +62,15 @@ export class NewsService {
 
     this.news[indexOfNews] = updatedNews;
 
-    return `Новость c id ${id} отредактирована.`;
+    return `Новость отредактирована.`;
   }
 
   remove(id: string): string {
-    const indexOfNews = this.findNewsIndex(id);
+    const news = this.findOne(id);
+    const indexOfNews = this.news.indexOf(news);
+
     this.news.splice(indexOfNews, 1);
 
-    return `Новость c id ${id} удалена.`;
+    return `Новость удалена.`;
   }
 }
