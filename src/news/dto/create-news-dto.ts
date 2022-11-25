@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateNewsDto {
@@ -18,8 +24,8 @@ export class CreateNewsDto {
   author: string;
 
   @ApiProperty()
+  @ValidateIf((o) => o.cover)
   @IsString()
-  @IsNotEmpty()
   cover: string;
 
   @ApiPropertyOptional()
