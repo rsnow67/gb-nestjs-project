@@ -19,6 +19,7 @@ import { UpdateNewsDto } from './dto/update-news-dto';
 import { NewsService } from './news.service';
 import { diskStorage } from 'multer';
 import { HelperFileLoad } from 'src/utils/HelperFileLoad';
+import imageFileFilter from 'src/utils/file-filters';
 
 const PATH_NEWS = '/news-static/';
 const helperFileLoad = new HelperFileLoad();
@@ -82,6 +83,7 @@ export class NewsController {
         destination: helperFileLoad.destinationPath.bind(helperFileLoad),
         filename: helperFileLoad.customFileName.bind(helperFileLoad),
       }),
+      fileFilter: imageFileFilter,
     }),
   )
   create(

@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import imageFileFilter from 'src/utils/file-filters';
 import { HelperFileLoad } from 'src/utils/HelperFileLoad';
 import { Comment } from './comments.interface';
 import { CommentsService } from './comments.service';
@@ -45,6 +46,7 @@ export class CommentsController {
         destination: helperFileLoad.destinationPath.bind(helperFileLoad),
         filename: helperFileLoad.customFileName.bind(helperFileLoad),
       }),
+      fileFilter: imageFileFilter,
     }),
   )
   create(
