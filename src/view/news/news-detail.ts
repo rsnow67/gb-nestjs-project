@@ -28,9 +28,30 @@ const renderCommentsList = (comments: Comment[]): string => {
     html += '<ul style="margin-left: 0; padding-left: 0">';
 
     comments.forEach((comment) => {
+      let avatarHtml = '';
+      let styles =
+        'margin-right: 10px; width: 32px; height: 32px; border-radius: 25px; ';
+
+      if (comment.avatar) {
+        avatarHtml = `
+          <img 
+            src=${comment.avatar} 
+            alt="user-avatar" 
+            style="${styles}"
+          />`;
+      } else {
+        styles += `background-color: grey `;
+        avatarHtml = `
+          <div style="${styles}"></div>
+        `;
+      }
+
       html += `
-                <li class="mt-4" style="list-style-type: none;">
-                    <p>${comment.author}</p>
+                <li class="mb-3 mt-4" style="list-style-type: none;">
+                    <div style="width: 100%; display: flex; align-items: center; margin: 0 0 10px 0; ">
+                      ${avatarHtml}
+                      <p style="margin: 0; ">${comment.author}</p>
+                    </div>
                     <p>${comment.text}</p>
                 </li>
             `;
