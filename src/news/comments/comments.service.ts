@@ -109,7 +109,7 @@ export class CommentsService {
     return 'Комментарии удалены.';
   }
 
-  remove(newsId: string, commentId: string) {
+  remove(newsId: string, commentId: string): string {
     const comment = this.findOne(newsId, commentId);
     const commentIndex = this.comments[newsId].indexOf(comment);
 
