@@ -3,7 +3,7 @@ export interface News {
   title: string;
   description: string;
   author: string;
-  cover: string;
+  cover?: string;
   countView?: number;
   comments?: Comment[];
 }
