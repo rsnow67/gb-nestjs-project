@@ -13,8 +13,7 @@ export class NewsService {
       description: 'text',
       author: 'Vadim',
       countView: 12,
-      cover:
-        'https://i.pinimg.com/736x/f4/d2/96/f4d2961b652880be432fb9580891ed62.jpg',
+      cover: '/f4d2961b652880be432fb9580891ed62.jpg',
     },
     {
       id: '2',
@@ -22,8 +21,7 @@ export class NewsService {
       description: 'text',
       author: 'Vadim',
       countView: 0,
-      cover:
-        'https://ichef.bbci.co.uk/news/640/cpsprodpb/14A82/production/_116301648_gettyimages-1071204136.jpg',
+      cover: '/_116301648_gettyimages-1071204136.jpg',
     },
   ];
 
@@ -32,6 +30,7 @@ export class NewsService {
       id: uuidv4(),
       ...createNewsDto,
     };
+    console.log(news);
 
     this.news.push(news);
 

@@ -6,11 +6,11 @@ import {
   Param,
   Patch,
   Post,
+  Render,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { renderNewsAll } from 'src/view/news/news-all';
 import { renderDetailNews } from 'src/view/news/news-detail';
 import { renderTemplate } from 'src/view/template';
 import { CommentsService } from './comments/comments.service';
@@ -49,14 +49,11 @@ export class NewsController {
   }
 
   @Get()
+  @Render('news-list')
   getAllViews() {
     const news = this.newsService.findAll();
-    const content = renderNewsAll(news);
 
-    return renderTemplate(content, {
-      title: 'Список новостей',
-      description: 'Самые крутые новости на свете',
-    });
+    return { news, title: 'Список новостей' };
   }
 
   @Get(':id/detail')
