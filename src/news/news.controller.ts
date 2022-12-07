@@ -73,6 +73,12 @@ export class NewsController {
     });
   }
 
+  @Get('create/new')
+  @Render('create-news')
+  async createView() {
+    return {};
+  }
+
   @Post()
   @UseInterceptors(
     FileInterceptor('cover', {
