@@ -2,12 +2,16 @@ import { Comment } from 'src/news/comments/comments.interface';
 import { News } from 'src/news/news.interface';
 
 export const renderDetailNews = (news: News, comments: Comment[]): string => {
+  const countViewHtml = news.countView
+    ? `<p>Количество просмотров: ${news.countView}</p>`
+    : '';
+
   return `
         <div class="container" style="max-width: 600px; margin: 0 auto;">
             <h1>${news.title}</h1>
             <div style="display: flex; justify-content: space-between ">
                 <p>Автор: ${news.author}</p>
-                <p>Количество прсмотров: ${news.countView}</p>
+                ${countViewHtml}
             </div>
             <img src=${
               news.cover

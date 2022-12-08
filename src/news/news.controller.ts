@@ -20,16 +20,19 @@ import { NewsService } from './news.service';
 import { diskStorage } from 'multer';
 import { HelperFileLoad } from 'src/utils/HelperFileLoad';
 import imageFileFilter from 'src/utils/file-filters';
+import { MailService } from 'src/mail/mail.service';
 
 const PATH_NEWS = '/news-static/';
 const helperFileLoad = new HelperFileLoad();
 helperFileLoad.path = PATH_NEWS;
+const adminMails = ['vidman07@mail.ru', 'vidmanv07@gmail.com'];
 
 @Controller('news')
 export class NewsController {
   constructor(
     private readonly newsService: NewsService,
     private readonly commentsService: CommentsService,
+    private readonly mailService: MailService,
   ) {}
 
   @Get('all')
@@ -89,16 +92,20 @@ export class NewsController {
       fileFilter: imageFileFilter,
     }),
   )
-  create(
+  async create(
     @Body() news: CreateNewsDto,
     @UploadedFile() cover: Express.Multer.File,
   ) {
     const coverPath = cover?.filename ? PATH_NEWS + cover.filename : '';
 
-    return this.newsService.create({
+    const newNews = this.newsService.create({
       ...news,
       cover: coverPath,
     });
+
+    await this.mailService.sendNewNewsForAdmins(adminMails, newNews);
+
+    return 'Новость создана.';
   }
 
   @Patch(':id')

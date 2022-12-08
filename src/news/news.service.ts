@@ -25,16 +25,15 @@ export class NewsService {
     },
   ];
 
-  create(createNewsDto: CreateNewsDto): string {
+  create(createNewsDto: CreateNewsDto): News {
     const news: News = {
       id: uuidv4(),
       ...createNewsDto,
     };
-    console.log(news);
 
     this.news.push(news);
 
-    return 'Новость создана.';
+    return news;
   }
 
   findAll(): News[] {
