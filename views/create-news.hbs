@@ -1,0 +1,70 @@
+<h1 class="mt-3">Создание новости</h1>
+<form id="create-news-form">
+  <div class="mb-3">
+    <label for="titleInput" class="form-label">Заголовок</label>
+    <input class="form-control" name="title" id="titleInput">
+  </div>
+  <div class="mb-3">
+    <label for="descriptionInput" class="form-label">Описание</label>
+    <textarea class="form-control" name="description" id="descriptionInput" rows="3"></textarea>
+  </div>
+  <div class="mb-3">
+    <label for="authorInput" class="form-label">Автор</label>
+    <input class="form-control" name="author" id="authorInput">
+  </div>
+  <div class="form-group">
+    <label class="mr-3" for="cover">Обложка</label>
+    <input type="file" class="form-control-file" name="cover" id="cover">
+  </div>
+  <button class="btn btn-primary mt-3" type="button" onclick="sendForm()">Отправить</button>
+</form>
+<script>
+  async function sendForm() {
+    const form = document.getElementById('create-news-form');
+    const data = new FormData(form);
+
+    if (validate()) {
+      const response = await fetch(`/news`, {
+        method: 'POST',
+        body: data
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        window.location.href = '/news';
+        alert('Новость создана.');
+      } else {
+        alert('Ошибка при создании новости.')
+      }
+    }
+  }
+
+  function validate() {
+    const titleInput = document.forms['create-news-form']['title'].value;
+    const descriptionInput = document.forms['create-news-form']['description'].value;
+    const authorInput = document.forms['create-news-form']['author'].value;
+    const coverInput = document.forms['create-news-form']['cover'].value;
+
+    if (!titleInput) {
+      alert('Введите заголовок новости.');
+      return false;
+    }
+
+    if (!descriptionInput) {
+      alert('Введите описание новости.');
+      return false;
+    }
+
+    if (!authorInput) {
+      alert('Укажите автора новости.');
+      return false;
+    }
+
+
+    if (!coverInput) {
+      alert('Загрузите фото для новости.');
+      return false;
+    }
+
+    return true;
+  }
+</script>

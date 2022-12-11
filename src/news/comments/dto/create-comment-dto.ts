@@ -13,7 +13,7 @@ export class CreateCommentDto {
   author: string;
 
   @ApiProperty()
-  @ValidateIf((o) => o.cover)
+  @ValidateIf((o) => o.avatar)
   @IsString()
   avatar: string;
 }

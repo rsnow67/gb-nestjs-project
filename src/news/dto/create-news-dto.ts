@@ -5,7 +5,7 @@ import {
   IsString,
   ValidateIf,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateNewsDto {
   @ApiProperty()
@@ -27,9 +27,4 @@ export class CreateNewsDto {
   @ValidateIf((o) => o.cover)
   @IsString()
   cover: string;
-
-  @ApiPropertyOptional()
-  @IsNumber()
-  @IsOptional()
-  countView?: number;
 }

@@ -49,7 +49,40 @@ export class CommentsController {
       fileFilter: imageFileFilter,
     }),
   )
-  create(
+  @Post(':newsId/')
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: helperFileLoad.destinationPath.bind(helperFileLoad),
+        filename: helperFileLoad.customFileName.bind(helperFileLoad),
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
+  createComment(
+    @Param('newsId') newsId: string,
+    @Body() createCommentDto: CreateCommentDto,
+    @UploadedFile() avatar: Express.Multer.File,
+  ): string {
+    const avatarPath = avatar?.filename ? PATH_AVATAR + avatar.filename : '';
+
+    return this.commentsService.create(newsId, {
+      ...createCommentDto,
+      avatar: avatarPath,
+    });
+  }
+
+  @Post(':newsId/:commentId')
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: helperFileLoad.destinationPath.bind(helperFileLoad),
+        filename: helperFileLoad.customFileName.bind(helperFileLoad),
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
+  createReply(
     @Param('newsId') newsId: string,
     @Param('commentId') commentId: string,
     @Body() createCommentDto: CreateCommentDto,
@@ -57,14 +90,7 @@ export class CommentsController {
   ): string {
     const avatarPath = avatar?.filename ? PATH_AVATAR + avatar.filename : '';
 
-    if (typeof commentId === 'string' && commentId !== ':commentId') {
-      return this.commentsService.createReply(newsId, commentId, {
-        ...createCommentDto,
-        avatar: avatarPath,
-      });
-    }
-
-    return this.commentsService.create(newsId, {
+    return this.commentsService.createReply(newsId, commentId, {
       ...createCommentDto,
       avatar: avatarPath,
     });
