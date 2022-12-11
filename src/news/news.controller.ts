@@ -11,8 +11,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { renderDetailNews } from 'src/view/news/news-detail';
-import { renderTemplate } from 'src/view/template';
 import { CommentsService } from './comments/comments.service';
 import { CreateNewsDto } from './dto/create-news-dto';
 import { UpdateNewsDto } from './dto/update-news-dto';
@@ -60,7 +58,8 @@ export class NewsController {
   }
 
   @Get(':id/detail')
-  getDetailView(@Param('id') id: string) {
+  @Render('news-detail')
+  getView(@Param('id') id: string) {
     const news = this.newsService.findOne(id);
     let comments = this.commentsService.findAll(id);
 
@@ -68,17 +67,12 @@ export class NewsController {
       comments = [];
     }
 
-    const content = renderDetailNews(news, comments);
-
-    return renderTemplate(content, {
-      title: news.title,
-      description: news.description,
-    });
+    return { news, comments };
   }
 
   @Get('create/new')
   @Render('create-news')
-  async createView() {
+  createView() {
     return {};
   }
 
