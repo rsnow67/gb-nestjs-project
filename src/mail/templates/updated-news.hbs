@@ -1,0 +1,45 @@
+<table>
+  {{#if new-title}}
+  <tr>
+    <td style="text-decoration: line-through; ">Заголовок был: <span
+        style="text-decoration: line-through; ">{{old-title}}</span>
+    </td>
+    <td>
+      <p>Стал: {{new-title}}</p>
+    </td>
+  </tr>
+  {{/if}}
+  {{#if new-description}}
+  <tr>
+    <td style="text-decoration: line-through; ">Описание было: <span
+        style="text-decoration: line-through; ">{{old-description}}</span>
+    </td>
+    <td>
+      <p>Стало: {{new-description}}</p>
+    </td>
+  </tr>
+  {{/if}}
+  {{#if new-author}}
+  <tr>
+    <td style="text-decoration: line-through; ">Автор был: <span
+        style="text-decoration: line-through; ">{{old-author}}</span>
+    </td>
+    <td>
+      <p>Стал: {{new-author}}</p>
+    </td>
+  </tr>
+  {{/if}}
+  {{#if new-cover}}
+  <tr>
+    <td>Обложка изменилась. Можете посмотреть по ссылке ниже.</td>
+  </tr>
+  {{/if}}
+  <tr>
+    <td>Ссылка на новость</td>
+    <td>
+      <a href='http://localhost:3000/news/{{id}}/detail'>
+        http://localhost:3000/news/{{id}}/detail
+      </a>
+    </td>
+  </tr>
+</table>

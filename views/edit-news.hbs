@@ -1,0 +1,64 @@
+<h1 class="mt-3">Редактирование новости</h1>
+<form id="edit-news-form">
+  <div class="mb-3">
+    <label for="titleInput" class="form-label">Заголовок</label>
+    <input class="form-control" name="title" id="titleInput" value="{{news.title}}">
+  </div>
+  <div class="mb-3">
+    <label for="descriptionInput" class="form-label">Описание</label>
+    <textarea class="form-control" name="description" id="descriptionInput" rows="3">{{news.description}}</textarea>
+  </div>
+  <div class="mb-3">
+    <label for="authorInput" class="form-label">Автор</label>
+    <input class="form-control" name="author" id="authorInput" value="{{news.author}}">
+  </div>
+  <h5>Текущая обложка</h5>
+  <img src="{{news.cover}}" alt="news" style="width: 100%; height: 100%; " />
+  <div class="form-group">
+    <label class="mr-3" for="cover">Загрузите новую обложку</label>
+    <input type="file" class="form-control-file" name="cover" id="cover">
+  </div>
+  <button class="btn btn-primary mt-3" type="button" onclick="sendForm()">Отправить</button>
+</form>
+<script>
+  const titleInputOld = document.forms['edit-news-form']['title'].value;
+  const descriptionInputOld = document.forms['edit-news-form']['description'].value;
+  const authorInputOld = document.forms['edit-news-form']['author'].value;
+
+  async function sendForm() {
+    const form = document.getElementById('edit-news-form');
+    const data = new FormData(form);
+    const newsId = window.location.pathname.split('/').at(-2);
+
+    if (validate()) {
+      const response = await fetch(`/news/${newsId}`, {
+        method: 'PATCH',
+        body: data
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        window.location.href = `/news/${newsId}/detail`;
+        alert('Новость отредактирована.');
+      } else {
+        alert('Ошибка при редактировании новости.')
+      }
+    }
+  }
+
+  function validate() {
+    const titleInput = document.forms['edit-news-form']['title'].value;
+    const descriptionInput = document.forms['edit-news-form']['description'].value;
+    const authorInput = document.forms['edit-news-form']['author'].value;
+    const coverInput = document.forms['edit-news-form']['cover'].value;
+
+    if (titleInput === titleInputOld 
+    && descriptionInput === descriptionInputOld 
+    && authorInput === authorInputOld 
+    && !coverInput) {
+      alert('Для редактирования новости нужно изменить хотя бы один параметр.');
+      return false;
+    }
+
+    return true;
+  }
+</script>

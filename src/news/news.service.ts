@@ -50,7 +50,7 @@ export class NewsService {
     return news;
   }
 
-  update(id: string, updateNewsDto: UpdateNewsDto): string {
+  update(id: string, updateNewsDto: UpdateNewsDto): News {
     const news = this.findOne(id);
     const indexOfNews = this.news.indexOf(news);
     const updatedNews = {
@@ -60,7 +60,7 @@ export class NewsService {
 
     this.news[indexOfNews] = updatedNews;
 
-    return `Новость отредактирована.`;
+    return updatedNews;
   }
 
   remove(id: string): string {
