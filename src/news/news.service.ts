@@ -1,47 +1,39 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { News } from './news.interface';
-import { v4 as uuidv4 } from 'uuid';
 import { CreateNewsDto } from './dto/create-news-dto';
 import { UpdateNewsDto } from './dto/update-news-dto';
+import { Repository } from 'typeorm';
+import { NewsEntity } from './news.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class NewsService {
-  private news: News[] = [
-    {
-      id: '1',
-      title: 'title 1',
-      description: 'text',
-      author: 'Vadim',
-      countView: 12,
-      cover: '/f4d2961b652880be432fb9580891ed62.jpg',
-    },
-    {
-      id: '2',
-      title: 'title 2',
-      description: 'text',
-      author: 'Vadim',
-      countView: 0,
-      cover: '/_116301648_gettyimages-1071204136.jpg',
-    },
-  ];
+  constructor(
+    @InjectRepository(NewsEntity)
+    private newsRepository: Repository<NewsEntity>,
+    private usersService: UsersService,
+  ) {}
 
-  create(createNewsDto: CreateNewsDto): News {
-    const news: News = {
-      id: uuidv4(),
+  async create(createNewsDto: CreateNewsDto): Promise<NewsEntity> {
+    const newNews = {
       ...createNewsDto,
+      user: await this.usersService.findOne(parseInt(createNewsDto.userId)),
     };
 
-    this.news.push(news);
+    delete newNews.userId;
 
-    return news;
+    return this.newsRepository.save(newNews);
   }
 
-  findAll(): News[] {
-    return this.news;
+  findAll(): Promise<NewsEntity[]> {
+    return this.newsRepository.find();
   }
 
-  findOne(id: string): News {
-    const news = this.news.find((news) => news.id === id);
+  async findOne(id: number): Promise<NewsEntity> {
+    const news = await this.newsRepository.findOne({
+      where: { id: id },
+      relations: ['user '],
+    });
 
     if (!news) {
       throw new HttpException('Новость не найдена.', 500);
@@ -50,25 +42,22 @@ export class NewsService {
     return news;
   }
 
-  update(id: string, updateNewsDto: UpdateNewsDto): News {
-    const news = this.findOne(id);
-    const indexOfNews = this.news.indexOf(news);
+  async update(id: number, updateNewsDto: UpdateNewsDto): Promise<NewsEntity> {
+    const news = await this.findOne(id);
     const updatedNews = {
       ...news,
       ...updateNewsDto,
     };
 
-    this.news[indexOfNews] = updatedNews;
+    this.newsRepository.save(updatedNews);
 
     return updatedNews;
   }
 
-  remove(id: string): string {
-    const news = this.findOne(id);
-    const indexOfNews = this.news.indexOf(news);
+  async remove(id: number): Promise<string> {
+    const news = await this.findOne(id);
+    this.newsRepository.remove(news);
 
-    this.news.splice(indexOfNews, 1);
-
-    return `Новость удалена.`;
+    return 'Новость удалена.';
   }
 }

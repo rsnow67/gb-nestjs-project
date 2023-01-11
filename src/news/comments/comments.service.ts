@@ -9,19 +9,19 @@ export class CommentsService {
   private readonly comments: Comments = {
     1: [
       {
-        id: '1',
+        id: 1,
         author: 'Alex',
         text: 'Первый комментарий',
       },
       {
-        id: '2',
+        id: 2,
         author: 'Alex',
         text: 'Второй комментарий',
       },
     ],
   };
 
-  findAll(newsId: string): Comment[] {
+  findAll(newsId: number): Comment[] {
     const comments = this.comments?.[newsId];
 
     if (!comments || !comments.length) {
@@ -31,7 +31,7 @@ export class CommentsService {
     return comments;
   }
 
-  findOne(newsId: string, commentId: string): Comment {
+  findOne(newsId: number, commentId: number): Comment {
     const comments = this.findAll(newsId);
     let comment = null;
 
@@ -46,7 +46,7 @@ export class CommentsService {
     return comment;
   }
 
-  create(newsId: string, createCommentDto: CreateCommentDto): string {
+  create(newsId: number, createCommentDto: CreateCommentDto): string {
     const comments = this.comments?.[newsId];
 
     if (!comments) {
@@ -54,7 +54,7 @@ export class CommentsService {
     }
 
     const comment = {
-      id: uuidv4(),
+      id: Date.now(),
       ...createCommentDto,
     };
 
@@ -64,8 +64,8 @@ export class CommentsService {
   }
 
   createReply(
-    newsId: string,
-    commentId: string,
+    newsId: number,
+    commentId: number,
     createCommentDto: CreateCommentDto,
   ): string {
     const comment = this.findOne(newsId, commentId);
@@ -85,8 +85,8 @@ export class CommentsService {
   }
 
   update(
-    newsId: string,
-    commentId: string,
+    newsId: number,
+    commentId: number,
     updateCommentDto: UpdateCommentDto,
   ): string {
     const comment = this.findOne(newsId, commentId);
@@ -101,7 +101,7 @@ export class CommentsService {
     return `Комментарий отредактирован.`;
   }
 
-  removeAll(newsId: string): string {
+  removeAll(newsId: number): string {
     this.findAll(newsId);
 
     delete this.comments[newsId];
@@ -109,7 +109,7 @@ export class CommentsService {
     return 'Комментарии удалены.';
   }
 
-  remove(newsId: string, commentId: string): string {
+  remove(newsId: number, commentId: number): string {
     const comment = this.findOne(newsId, commentId);
     const commentIndex = this.comments[newsId].indexOf(comment);
 

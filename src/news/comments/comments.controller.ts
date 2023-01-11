@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   UploadedFile,
@@ -27,14 +28,14 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Get(':newsId')
-  getAll(@Param('newsId') newsId: string): Comment[] {
+  getAll(@Param('newsId', ParseIntPipe) newsId: number): Comment[] {
     return this.commentsService.findAll(newsId);
   }
 
   @Get(':newsId/:commentId')
   get(
-    @Param('newsId') newsId: string,
-    @Param('commentId') commentId: string,
+    @Param('newsId', ParseIntPipe) newsId: number,
+    @Param('commentId', ParseIntPipe) commentId: number,
   ): Comment {
     return this.commentsService.findOne(newsId, commentId);
   }
@@ -60,7 +61,7 @@ export class CommentsController {
     }),
   )
   createComment(
-    @Param('newsId') newsId: string,
+    @Param('newsId', ParseIntPipe) newsId: number,
     @Body() createCommentDto: CreateCommentDto,
     @UploadedFile() avatar: Express.Multer.File,
   ): string {
@@ -83,8 +84,8 @@ export class CommentsController {
     }),
   )
   createReply(
-    @Param('newsId') newsId: string,
-    @Param('commentId') commentId: string,
+    @Param('newsId', ParseIntPipe) newsId: number,
+    @Param('commentId', ParseIntPipe) commentId: number,
     @Body() createCommentDto: CreateCommentDto,
     @UploadedFile() avatar: Express.Multer.File,
   ): string {
@@ -98,22 +99,22 @@ export class CommentsController {
 
   @Patch(':newsId/:commentId')
   update(
-    @Param('newsId') newsId: string,
-    @Param('commentId') commentId: string,
+    @Param('newsId', ParseIntPipe) newsId: number,
+    @Param('commentId', ParseIntPipe) commentId: number,
     @Body() updateCommentDto: UpdateCommentDto,
   ): string {
     return this.commentsService.update(newsId, commentId, updateCommentDto);
   }
 
   @Delete(':newsId')
-  removeAll(@Param('newsId') newsId: string): string {
+  removeAll(@Param('newsId', ParseIntPipe) newsId: number): string {
     return this.commentsService.removeAll(newsId);
   }
 
   @Delete(':newsId/:commentId')
   remove(
-    @Param('newsId') newsId: string,
-    @Param('commentId') commentId: string,
+    @Param('newsId', ParseIntPipe) newsId: number,
+    @Param('commentId', ParseIntPipe) commentId: number,
   ): string {
     return this.commentsService.remove(newsId, commentId);
   }

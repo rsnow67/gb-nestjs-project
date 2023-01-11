@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Render,
@@ -19,11 +20,12 @@ import { diskStorage } from 'multer';
 import { HelperFileLoad } from 'src/utils/HelperFileLoad';
 import imageFileFilter from 'src/utils/file-filters';
 import { MailService } from 'src/mail/mail.service';
-import { News } from './news.interface';
+import { NewsEntity } from './news.entity';
 
 const PATH_NEWS = '/news-static/';
 const helperFileLoad = new HelperFileLoad();
 helperFileLoad.path = PATH_NEWS;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const adminMails = ['vidman07@mail.ru', 'vidmanv07@gmail.com'];
 
 @Controller('news')
@@ -35,13 +37,13 @@ export class NewsController {
   ) {}
 
   @Get('all')
-  getAll() {
-    return this.newsService.findAll();
+  async getAll() {
+    return await this.newsService.findAll();
   }
 
   @Get(':id')
-  get(@Param('id') id: string) {
-    const news = this.newsService.findOne(id);
+  async get(@Param('id', ParseIntPipe) id: number) {
+    const news = await this.newsService.findOne(id);
     const comments = this.commentsService.findAll(id);
 
     return {
@@ -52,16 +54,16 @@ export class NewsController {
 
   @Get()
   @Render('news-list')
-  getAllViews() {
-    const news = this.newsService.findAll();
+  async getAllViews() {
+    const news = await this.newsService.findAll();
 
     return { news, title: 'Список новостей' };
   }
 
   @Get(':id/detail')
   @Render('news-detail')
-  getView(@Param('id') id: string) {
-    const news = this.newsService.findOne(id);
+  async getView(@Param('id', ParseIntPipe) id: number) {
+    const news = await this.newsService.findOne(id);
     let comments = this.commentsService.findAll(id);
 
     if (!Array.isArray(comments)) {
@@ -79,8 +81,8 @@ export class NewsController {
 
   @Get(':id/edit')
   @Render('edit-news')
-  getEditView(@Param('id') id: string) {
-    const news = this.newsService.findOne(id);
+  async getEditView(@Param('id', ParseIntPipe) id: number) {
+    const news = await this.newsService.findOne(id);
 
     return { news };
   }
@@ -101,12 +103,13 @@ export class NewsController {
   ) {
     const coverPath = cover?.filename ? PATH_NEWS + cover.filename : '';
 
-    const newNews = this.newsService.create({
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const newNews = await this.newsService.create({
       ...news,
       cover: coverPath,
     });
 
-    await this.mailService.sendNewNewsForAdmins(adminMails, newNews);
+    // await this.mailService.sendNewNewsForAdmins(adminMails, newNews);
 
     return 'Новость создана.';
   }
@@ -122,7 +125,7 @@ export class NewsController {
     }),
   )
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateNewsDto: UpdateNewsDto,
     @UploadedFile() cover: Express.Multer.File,
   ) {
@@ -130,9 +133,9 @@ export class NewsController {
 
     if (cover?.filename) data.cover = PATH_NEWS + cover.filename;
 
-    const oldNews = this.newsService.findOne(id);
-    const updatedNews = this.newsService.update(id, data);
-    const dataForEmail: Partial<News> = {};
+    const oldNews = await this.newsService.findOne(id);
+    const updatedNews = await this.newsService.update(id, data);
+    const dataForEmail: Partial<NewsEntity> = {};
 
     for (const key in updatedNews) {
       const newValue = updatedNews[key];
@@ -146,17 +149,17 @@ export class NewsController {
 
     dataForEmail.id = updatedNews.id;
 
-    await this.mailService.sendUpdatedNewsForAdmins(
-      adminMails,
-      dataForEmail,
-      oldNews.title,
-    );
+    // await this.mailService.sendUpdatedNewsForAdmins(
+    //   adminMails,
+    //   dataForEmail,
+    //   oldNews.title,
+    // );
 
     return `Новость отредактирована.`;
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.newsService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return await this.newsService.remove(id);
   }
 }

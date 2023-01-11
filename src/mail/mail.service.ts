@@ -1,5 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
+import { NewsEntity } from 'src/news/news.entity';
 import { News } from 'src/news/news.interface';
 
 @Injectable()
@@ -21,7 +22,10 @@ export class MailService {
       });
   }
 
-  async sendNewNewsForAdmins(emails: string[], news: News): Promise<void> {
+  async sendNewNewsForAdmins(
+    emails: string[],
+    news: NewsEntity,
+  ): Promise<void> {
     for (const email of emails) {
       await this.mailerService
         .sendMail({
@@ -41,7 +45,7 @@ export class MailService {
 
   async sendUpdatedNewsForAdmins(
     emails: string[],
-    data: Partial<News>,
+    data: Partial<NewsEntity>,
     oldTitle: string,
   ): Promise<void> {
     for (const email of emails) {
