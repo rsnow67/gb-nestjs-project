@@ -16,5 +16,6 @@ import { UsersModule } from 'src/users/users.module';
     MailModule,
     UsersModule,
   ],
+  exports: [TypeOrmModule.forFeature([NewsEntity]), NewsService],
 })
 export class NewsModule {}

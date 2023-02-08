@@ -20,7 +20,7 @@ import { UsersModule } from './users/users.module';
       port: 5432,
       username: 'postgres',
       password: 'deadline47',
-      database: 'nest-news-blog',
+      database: 'gb-nest-news-blog',
       entities: ['dist/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),

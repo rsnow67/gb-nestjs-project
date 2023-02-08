@@ -25,8 +25,34 @@ import { NewsEntity } from './news.entity';
 const PATH_NEWS = '/news-static/';
 const helperFileLoad = new HelperFileLoad();
 helperFileLoad.path = PATH_NEWS;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const adminMails = ['vidman07@mail.ru', 'vidmanv07@gmail.com'];
+const adminMails = ['vidmanv07@gmail.com'];
+
+const createDataForMail = (
+  oldNews: NewsEntity,
+  updatedNews: NewsEntity,
+): Partial<NewsEntity> => {
+  const data = {};
+  const keys = ['title', 'description', 'cover'];
+
+  keys.forEach((key) => {
+    const oldValue = oldNews[key];
+    const newValue = updatedNews[key];
+
+    if (oldValue !== newValue) {
+      data[`old-${key}`] = oldValue;
+      data[`new-${key}`] = newValue;
+    }
+  });
+
+  if (oldNews.user?.nickName !== updatedNews.user?.nickName) {
+    data['old-user'] = oldNews.user.nickName;
+    data['new-user'] = updatedNews.user.nickName;
+  }
+
+  data['id'] = updatedNews.id;
+
+  return data;
+};
 
 @Controller('news')
 export class NewsController {
@@ -43,13 +69,7 @@ export class NewsController {
 
   @Get(':id')
   async get(@Param('id', ParseIntPipe) id: number) {
-    const news = await this.newsService.findOne(id);
-    const comments = this.commentsService.findAll(id);
-
-    return {
-      ...news,
-      comments,
-    };
+    return await this.newsService.findOne(id);
   }
 
   @Get()
@@ -64,11 +84,7 @@ export class NewsController {
   @Render('news-detail')
   async getView(@Param('id', ParseIntPipe) id: number) {
     const news = await this.newsService.findOne(id);
-    let comments = this.commentsService.findAll(id);
-
-    if (!Array.isArray(comments)) {
-      comments = [];
-    }
+    const comments = await this.commentsService.findAll(id);
 
     return { news, comments };
   }
@@ -103,13 +119,12 @@ export class NewsController {
   ) {
     const coverPath = cover?.filename ? PATH_NEWS + cover.filename : '';
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const newNews = await this.newsService.create({
       ...news,
       cover: coverPath,
     });
 
-    // await this.mailService.sendNewNewsForAdmins(adminMails, newNews);
+    await this.mailService.sendNewNewsForAdmins(adminMails, newNews);
 
     return 'Новость создана.';
   }
@@ -135,25 +150,13 @@ export class NewsController {
 
     const oldNews = await this.newsService.findOne(id);
     const updatedNews = await this.newsService.update(id, data);
-    const dataForEmail: Partial<NewsEntity> = {};
+    const dataForEmail = createDataForMail(oldNews, updatedNews);
 
-    for (const key in updatedNews) {
-      const newValue = updatedNews[key];
-      const oldValue = oldNews[key];
-
-      if (newValue !== oldValue) {
-        dataForEmail[`new-${key}`] = newValue;
-        dataForEmail[`old-${key}`] = oldValue;
-      }
-    }
-
-    dataForEmail.id = updatedNews.id;
-
-    // await this.mailService.sendUpdatedNewsForAdmins(
-    //   adminMails,
-    //   dataForEmail,
-    //   oldNews.title,
-    // );
+    await this.mailService.sendUpdatedNewsForAdmins(
+      adminMails,
+      dataForEmail,
+      oldNews.title,
+    );
 
     return `Новость отредактирована.`;
   }

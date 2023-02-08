@@ -1,13 +1,23 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
   Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { HelperFileLoad } from 'src/utils/HelperFileLoad';
 import { CreateUserDto } from './dto/create-user-dto';
 import { UsersService } from './users.service';
+
+const PATH_AVATAR = '/avatar-static/';
+const helperFileLoad = new HelperFileLoad();
+helperFileLoad.path = PATH_AVATAR;
 
 @Controller('users')
 export class UsersController {
@@ -24,9 +34,30 @@ export class UsersController {
   }
 
   @Post()
-  async create(@Body() createUserDto: CreateUserDto) {
-    const newUser = await this.userService.create(createUserDto);
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: helperFileLoad.destinationPath.bind(helperFileLoad),
+        filename: helperFileLoad.customFileName.bind(helperFileLoad),
+      }),
+    }),
+  )
+  async create(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFile() avatar: Express.Multer.File,
+  ) {
+    console.log('мы в контроллере');
+    const avatarPath = avatar?.filename ? PATH_AVATAR + avatar.filename : '';
+    const newUser = await this.userService.create({
+      ...createUserDto,
+      avatar: avatarPath,
+    });
 
-    return `Пользователь с именем ${newUser.firstName} создан.`;
+    return `Пользователь с именем ${newUser.nickName} создан.`;
+  }
+
+  @Delete(':id')
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return await this.userService.remove(id);
   }
 }

@@ -2,20 +2,20 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user-dto';
-import { UserEntity } from './user.entity';
+import { UsersEntity } from './users.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(UserEntity)
-    private usersRepository: Repository<UserEntity>,
+    @InjectRepository(UsersEntity)
+    private usersRepository: Repository<UsersEntity>,
   ) {}
 
-  findAll(): Promise<UserEntity[]> {
+  async findAll(): Promise<UsersEntity[]> {
     return this.usersRepository.find();
   }
 
-  async findOne(id: number): Promise<UserEntity> {
+  async findOne(id: number): Promise<UsersEntity> {
     const user = await this.usersRepository.findOneBy({ id });
 
     if (!user) {
@@ -25,7 +25,15 @@ export class UsersService {
     return user;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UserEntity> {
+  async create(createUserDto: CreateUserDto): Promise<UsersEntity> {
     return this.usersRepository.save(createUserDto);
+  }
+
+  async remove(id: number): Promise<string> {
+    const user = await this.findOne(id);
+
+    this.usersRepository.remove(user);
+
+    return `Пользователь ${user.nickName} удален.`;
   }
 }

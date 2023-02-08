@@ -12,6 +12,7 @@ export class CreateNewsDto {
   @IsNotEmpty()
   description: string;
 
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   userId: string;

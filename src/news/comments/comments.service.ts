@@ -1,43 +1,39 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { Comment, Comments } from './comments.interface';
 import { CreateCommentDto } from './dto/create-comment-dto';
-import { v4 as uuidv4 } from 'uuid';
 import { UpdateCommentDto } from './dto/update-comment-dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CommentsEntity } from './comments.entity';
+import { Repository } from 'typeorm';
+import { NewsService } from '../news.service';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class CommentsService {
-  private readonly comments: Comments = {
-    1: [
-      {
-        id: 1,
-        author: 'Alex',
-        text: 'Первый комментарий',
+  constructor(
+    @InjectRepository(CommentsEntity)
+    private commentsRepository: Repository<CommentsEntity>,
+    private newsService: NewsService,
+    private usersService: UsersService,
+  ) {}
+
+  async findAll(newsId: number): Promise<CommentsEntity[]> {
+    return this.commentsRepository.find({
+      where: {
+        news: {
+          id: newsId,
+        },
       },
-      {
-        id: 2,
-        author: 'Alex',
-        text: 'Второй комментарий',
-      },
-    ],
-  };
-
-  findAll(newsId: number): Comment[] {
-    const comments = this.comments?.[newsId];
-
-    if (!comments || !comments.length) {
-      return [];
-    }
-
-    return comments;
+      relations: ['user', 'news'],
+    });
   }
 
-  findOne(newsId: number, commentId: number): Comment {
-    const comments = this.findAll(newsId);
-    let comment = null;
-
-    if (comments.length > 0) {
-      comment = comments.find((comment) => comment.id === commentId);
-    }
+  async findOne(id: number): Promise<CommentsEntity> {
+    const comment = await this.commentsRepository.findOne({
+      where: {
+        id,
+      },
+      relations: ['user', 'news'],
+    });
 
     if (!comment) {
       throw new HttpException('Комментарий не найден.', 500);
@@ -46,74 +42,49 @@ export class CommentsService {
     return comment;
   }
 
-  create(newsId: number, createCommentDto: CreateCommentDto): string {
-    const comments = this.comments?.[newsId];
-
-    if (!comments) {
-      this.comments[newsId] = [];
-    }
-
-    const comment = {
-      id: Date.now(),
-      ...createCommentDto,
-    };
-
-    this.comments[newsId].push(comment);
-
-    return 'Комментарий создан.';
-  }
-
-  createReply(
+  async create(
     newsId: number,
-    commentId: number,
     createCommentDto: CreateCommentDto,
-  ): string {
-    const comment = this.findOne(newsId, commentId);
-
-    if (!comment.replies) {
-      comment.replies = [];
-    }
-
-    const reply = {
-      id: uuidv4(),
-      ...createCommentDto,
+  ): Promise<CommentsEntity> {
+    const { userId, text } = createCommentDto;
+    const news = await this.newsService.findOne(newsId);
+    const user = await this.usersService.findOne(userId);
+    const comment = {
+      text,
+      news,
+      user,
     };
 
-    comment.replies.push(reply);
-
-    return 'Ответ на комментарий создан.';
+    return this.commentsRepository.save(comment);
   }
 
-  update(
-    newsId: number,
-    commentId: number,
+  async update(
+    id: number,
     updateCommentDto: UpdateCommentDto,
-  ): string {
-    const comment = this.findOne(newsId, commentId);
-    const commentIndex = this.comments[newsId].indexOf(comment);
-    const updateComment = {
+  ): Promise<CommentsEntity> {
+    const comment = await this.findOne(id);
+    const updatedComment = {
       ...comment,
       ...updateCommentDto,
     };
 
-    this.comments[newsId][commentIndex] = updateComment;
+    this.commentsRepository.save(updatedComment);
 
-    return `Комментарий отредактирован.`;
+    return updatedComment;
   }
 
-  removeAll(newsId: number): string {
-    this.findAll(newsId);
+  async removeAll(newsId: number): Promise<string> {
+    const comments = await this.findAll(newsId);
 
-    delete this.comments[newsId];
+    this.commentsRepository.remove(comments);
 
     return 'Комментарии удалены.';
   }
 
-  remove(newsId: number, commentId: number): string {
-    const comment = this.findOne(newsId, commentId);
-    const commentIndex = this.comments[newsId].indexOf(comment);
+  async remove(id: number): Promise<string> {
+    const comment = await this.findOne(id);
 
-    this.comments[newsId].splice(commentIndex, 1);
+    this.commentsRepository.remove(comment);
 
     return 'Комментарий удален.';
   }

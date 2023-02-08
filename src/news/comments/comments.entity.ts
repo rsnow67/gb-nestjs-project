@@ -4,31 +4,24 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CommentsEntity } from './comments/comments.entity';
+import { NewsEntity } from '../news.entity';
 
-@Entity('news')
-export class NewsEntity {
+@Entity('comments')
+export class CommentsEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column('text')
-  title: string;
+  text: string;
 
-  @Column('text')
-  description: string;
-
-  @ManyToOne(() => UsersEntity, (user) => user.news)
+  @ManyToOne(() => UsersEntity, (user) => user.comments)
   user: UsersEntity;
 
-  @Column('text', { nullable: true })
-  cover?: string;
-
-  @OneToMany(() => CommentsEntity, (comments) => comments.news)
-  comments: CommentsEntity[];
+  @ManyToOne(() => NewsEntity, (news) => news.comments)
+  news: NewsEntity;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

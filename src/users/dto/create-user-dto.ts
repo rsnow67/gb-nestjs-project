@@ -1,7 +1,11 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, ValidateIf } from 'class-validator';
 
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
-  firstName: string;
+  nickName: string;
+
+  @ValidateIf((o) => o.avatar)
+  @IsString()
+  avatar: string;
 }

@@ -15,24 +15,27 @@ export class NewsService {
   ) {}
 
   async create(createNewsDto: CreateNewsDto): Promise<NewsEntity> {
+    const { userId, ...newsData } = createNewsDto;
     const newNews = {
-      ...createNewsDto,
-      user: await this.usersService.findOne(parseInt(createNewsDto.userId)),
+      ...newsData,
+      user: await this.usersService.findOne(parseInt(userId)),
     };
-
-    delete newNews.userId;
 
     return this.newsRepository.save(newNews);
   }
 
   findAll(): Promise<NewsEntity[]> {
-    return this.newsRepository.find();
+    return this.newsRepository.find({
+      relations: ['user', 'comments', 'comments.user'],
+    });
   }
 
   async findOne(id: number): Promise<NewsEntity> {
     const news = await this.newsRepository.findOne({
-      where: { id: id },
-      relations: ['user '],
+      where: {
+        id,
+      },
+      relations: ['user', 'comments', 'comments.user'],
     });
 
     if (!news) {
