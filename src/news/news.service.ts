@@ -30,6 +30,17 @@ export class NewsService {
     });
   }
 
+  findAllByAuthor(userId: number): Promise<NewsEntity[]> {
+    return this.newsRepository.find({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      relations: ['user', 'comments', 'comments.user'],
+    });
+  }
+
   async findOne(id: number): Promise<NewsEntity> {
     const news = await this.newsRepository.findOne({
       where: {

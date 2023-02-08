@@ -46,7 +46,6 @@ export class UsersController {
     @Body() createUserDto: CreateUserDto,
     @UploadedFile() avatar: Express.Multer.File,
   ) {
-    console.log('мы в контроллере');
     const avatarPath = avatar?.filename ? PATH_AVATAR + avatar.filename : '';
     const newUser = await this.userService.create({
       ...createUserDto,

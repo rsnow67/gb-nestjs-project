@@ -67,6 +67,11 @@ export class NewsController {
     return await this.newsService.findAll();
   }
 
+  @Get('all/:userId')
+  async getAllUserNews(@Param('userId', ParseIntPipe) userId: number) {
+    return await this.newsService.findAllByAuthor(userId);
+  }
+
   @Get(':id')
   async get(@Param('id', ParseIntPipe) id: number) {
     return await this.newsService.findOne(id);
