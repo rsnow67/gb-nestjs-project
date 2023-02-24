@@ -48,7 +48,7 @@ export class CommentsService {
   ): Promise<CommentsEntity> {
     const { userId, text } = createCommentDto;
     const news = await this.newsService.findOne(newsId);
-    const user = await this.usersService.findOne(userId);
+    const user = await this.usersService.findById(userId);
     const comment = {
       text,
       news,

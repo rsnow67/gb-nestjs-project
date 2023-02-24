@@ -30,7 +30,7 @@ export class UsersController {
 
   @Get(':id')
   async get(@Param('id', ParseIntPipe) id: number) {
-    return await this.userService.findOne(id);
+    return await this.userService.findById(id);
   }
 
   @Post()
