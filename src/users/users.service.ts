@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { hash } from 'src/utils/crypto';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user-dto';
+import UpdateUserDto from './dto/update-user-dto';
 import { UsersEntity } from './users.entity';
 
 @Injectable()
@@ -36,7 +37,7 @@ export class UsersService {
     return user;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<UsersEntity> {
+  async create(createUserDto: CreateUserDto): Promise<Partial<UsersEntity>> {
     const passwordHash = await hash(createUserDto.password);
 
     const user = {
@@ -44,7 +45,35 @@ export class UsersService {
       password: passwordHash,
     };
 
-    return this.usersRepository.save(user);
+    this.usersRepository.save(user);
+
+    const { password, ...result } = user;
+
+    return result;
+  }
+
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<Partial<UsersEntity>> {
+    const user = await this.findById(id);
+
+    const data = { ...updateUserDto };
+
+    if (data.password) {
+      data.password = await hash(data.password);
+    }
+
+    const updatedUser = {
+      ...user,
+      ...data,
+    };
+
+    this.usersRepository.save(updatedUser);
+
+    const { password, ...result } = updatedUser;
+
+    return result;
   }
 
   async remove(id: number): Promise<string> {

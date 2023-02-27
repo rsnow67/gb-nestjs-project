@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -13,6 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { HelperFileLoad } from 'src/utils/HelperFileLoad';
 import { CreateUserDto } from './dto/create-user-dto';
+import UpdateUserDto from './dto/update-user-dto';
 import { UsersService } from './users.service';
 
 const PATH_AVATAR = '/avatar-static/';
@@ -53,6 +55,28 @@ export class UsersController {
     });
 
     return `Пользователь с именем ${newUser.nickName} создан.`;
+  }
+
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: helperFileLoad.destinationPath.bind(helperFileLoad),
+        filename: helperFileLoad.customFileName.bind(helperFileLoad),
+      }),
+    }),
+  )
+  @Patch(':id')
+  async update(
+    @Param('id') id: number,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() avatar: Express.Multer.File,
+  ) {
+    const avatarPath = avatar?.filename ? PATH_AVATAR + avatar?.filename : '';
+    const data = avatarPath
+      ? { ...updateUserDto, avatar: avatarPath }
+      : { ...updateUserDto };
+
+    return await this.userService.update(id, data);
   }
 
   @Delete(':id')

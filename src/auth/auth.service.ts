@@ -19,7 +19,6 @@ export class AuthService {
     const isPasswordCorrect = await compare(password, user.password);
 
     if (user && isPasswordCorrect) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
       return result;
     }

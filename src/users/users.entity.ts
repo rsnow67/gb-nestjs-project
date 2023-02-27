@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { IsEnum } from 'class-validator';
 import { Role } from 'src/auth/roles/roles.enum';
 import { CommentsEntity } from 'src/news/comments/comments.entity';
@@ -22,6 +23,7 @@ export class UsersEntity {
   @Column('text')
   email: string;
 
+  @Exclude({ toPlainOnly: true })
   @Column('text')
   password: string;
 
