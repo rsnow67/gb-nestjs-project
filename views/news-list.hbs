@@ -1,14 +1,15 @@
 {{#if news}}
-<div class="row">
+<div class="row mt-4">
   {{#each news}}
-  <div class="col-lg-6">
+  <div class="col-lg-6 mt-3">
     <div class="card">
       <img src='http://localhost:3000{{this.cover}}' class="card-img-top" style="height: 200px; object-fit: cover;"
         alt="news">
       <div class="card-body">
         <h5 class="card-title">{{this.title}}</h5>
-        <h6 class="card-subtitle mb-2 text-muted">Автор: {{this.author}}</h6>
+        <h6 class="card-subtitle mb-2 text-muted">Автор: {{this.user.nickName}}</h6>
         <p class="card-text">{{this.description}}</p>
+        <a href="/news/{{this.id}}/detail">Перейти к новости</a>
       </div>
     </div>
   </div>

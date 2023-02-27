@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   UploadedFile,
@@ -13,7 +14,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import imageFileFilter from 'src/utils/file-filters';
 import { HelperFileLoad } from 'src/utils/HelperFileLoad';
-import { Comment } from './comments.interface';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment-dto';
 import { UpdateCommentDto } from './dto/update-comment-dto';
@@ -27,94 +27,62 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Get(':newsId')
-  getAll(@Param('newsId') newsId: string): Comment[] {
+  async getAll(@Param('newsId', ParseIntPipe) newsId: number) {
     return this.commentsService.findAll(newsId);
   }
 
-  @Get(':newsId/:commentId')
-  get(
-    @Param('newsId') newsId: string,
-    @Param('commentId') commentId: string,
-  ): Comment {
-    return this.commentsService.findOne(newsId, commentId);
+  @Get(':newsId/:id')
+  async get(@Param('id', ParseIntPipe) id: number) {
+    return this.commentsService.findOne(id);
   }
 
-  @Post(':newsId/:commentId')
-  @UseInterceptors(
-    FileInterceptor('avatar', {
-      storage: diskStorage({
-        destination: helperFileLoad.destinationPath.bind(helperFileLoad),
-        filename: helperFileLoad.customFileName.bind(helperFileLoad),
-      }),
-      fileFilter: imageFileFilter,
-    }),
-  )
-  @Post(':newsId/')
-  @UseInterceptors(
-    FileInterceptor('avatar', {
-      storage: diskStorage({
-        destination: helperFileLoad.destinationPath.bind(helperFileLoad),
-        filename: helperFileLoad.customFileName.bind(helperFileLoad),
-      }),
-      fileFilter: imageFileFilter,
-    }),
-  )
+  @Post(':newsId')
   createComment(
-    @Param('newsId') newsId: string,
+    @Param('newsId', ParseIntPipe) newsId: number,
     @Body() createCommentDto: CreateCommentDto,
-    @UploadedFile() avatar: Express.Multer.File,
-  ): string {
-    const avatarPath = avatar?.filename ? PATH_AVATAR + avatar.filename : '';
-
-    return this.commentsService.create(newsId, {
-      ...createCommentDto,
-      avatar: avatarPath,
-    });
+  ) {
+    return this.commentsService.create(newsId, createCommentDto);
   }
 
-  @Post(':newsId/:commentId')
-  @UseInterceptors(
-    FileInterceptor('avatar', {
-      storage: diskStorage({
-        destination: helperFileLoad.destinationPath.bind(helperFileLoad),
-        filename: helperFileLoad.customFileName.bind(helperFileLoad),
-      }),
-      fileFilter: imageFileFilter,
-    }),
-  )
-  createReply(
-    @Param('newsId') newsId: string,
-    @Param('commentId') commentId: string,
-    @Body() createCommentDto: CreateCommentDto,
-    @UploadedFile() avatar: Express.Multer.File,
-  ): string {
-    const avatarPath = avatar?.filename ? PATH_AVATAR + avatar.filename : '';
+  // @Post(':newsId/:commentId')
+  // @UseInterceptors(
+  //   FileInterceptor('avatar', {
+  //     storage: diskStorage({
+  //       destination: helperFileLoad.destinationPath.bind(helperFileLoad),
+  //       filename: helperFileLoad.customFileName.bind(helperFileLoad),
+  //     }),
+  //     fileFilter: imageFileFilter,
+  //   }),
+  // )
+  // createReply(
+  //   @Param('newsId', ParseIntPipe) newsId: number,
+  //   @Param('commentId', ParseIntPipe) commentId: number,
+  //   @Body() createCommentDto: CreateCommentDto,
+  //   @UploadedFile() avatar: Express.Multer.File,
+  // ): string {
+  //   const avatarPath = avatar?.filename ? PATH_AVATAR + avatar.filename : '';
 
-    return this.commentsService.createReply(newsId, commentId, {
-      ...createCommentDto,
-      avatar: avatarPath,
-    });
-  }
+  //   return this.commentsService.createReply(newsId, commentId, {
+  //     ...createCommentDto,
+  //     avatar: avatarPath,
+  //   });
+  // }
 
-  @Patch(':newsId/:commentId')
+  @Patch(':newsId/:id')
   update(
-    @Param('newsId') newsId: string,
-    @Param('commentId') commentId: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateCommentDto: UpdateCommentDto,
-  ): string {
-    return this.commentsService.update(newsId, commentId, updateCommentDto);
+  ) {
+    return this.commentsService.update(id, updateCommentDto);
   }
 
   @Delete(':newsId')
-  removeAll(@Param('newsId') newsId: string): string {
+  removeAll(@Param('newsId', ParseIntPipe) newsId: number) {
     return this.commentsService.removeAll(newsId);
   }
 
-  @Delete(':newsId/:commentId')
-  remove(
-    @Param('newsId') newsId: string,
-    @Param('commentId') commentId: string,
-  ): string {
-    return this.commentsService.remove(newsId, commentId);
+  @Delete(':newsId/:id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.commentsService.remove(id);
   }
 }

@@ -1,7 +1,7 @@
 <div class='container' style='max-width: 600px; margin: 0 auto;'>
   <h1>{{news.title}}</h1>
   <div style='display: flex; justify-content: space-between '>
-    <p>Автор: {{news.author}}</p>
+    <p>Автор: {{news.user.nickName}}</p>
     {{#if news.countView}}
     <p>Количество просмотров: {{news.countView}}</p>
     {{/if}}

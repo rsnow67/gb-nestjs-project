@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Render,
@@ -19,12 +20,39 @@ import { diskStorage } from 'multer';
 import { HelperFileLoad } from 'src/utils/HelperFileLoad';
 import imageFileFilter from 'src/utils/file-filters';
 import { MailService } from 'src/mail/mail.service';
-import { News } from './news.interface';
+import { NewsEntity } from './news.entity';
 
 const PATH_NEWS = '/news-static/';
 const helperFileLoad = new HelperFileLoad();
 helperFileLoad.path = PATH_NEWS;
-const adminMails = ['vidman07@mail.ru', 'vidmanv07@gmail.com'];
+const adminMails = ['vidmanv07@gmail.com'];
+
+const createDataForMail = (
+  oldNews: NewsEntity,
+  updatedNews: NewsEntity,
+): Partial<NewsEntity> => {
+  const data = {};
+  const keys = ['title', 'description', 'cover'];
+
+  keys.forEach((key) => {
+    const oldValue = oldNews[key];
+    const newValue = updatedNews[key];
+
+    if (oldValue !== newValue) {
+      data[`old-${key}`] = oldValue;
+      data[`new-${key}`] = newValue;
+    }
+  });
+
+  if (oldNews.user?.nickName !== updatedNews.user?.nickName) {
+    data['old-user'] = oldNews.user.nickName;
+    data['new-user'] = updatedNews.user.nickName;
+  }
+
+  data['id'] = updatedNews.id;
+
+  return data;
+};
 
 @Controller('news')
 export class NewsController {
@@ -35,38 +63,33 @@ export class NewsController {
   ) {}
 
   @Get('all')
-  getAll() {
-    return this.newsService.findAll();
+  async getAll() {
+    return await this.newsService.findAll();
+  }
+
+  @Get('all/:userId')
+  async getAllUserNews(@Param('userId', ParseIntPipe) userId: number) {
+    return await this.newsService.findAllByAuthor(userId);
   }
 
   @Get(':id')
-  get(@Param('id') id: string) {
-    const news = this.newsService.findOne(id);
-    const comments = this.commentsService.findAll(id);
-
-    return {
-      ...news,
-      comments,
-    };
+  async get(@Param('id', ParseIntPipe) id: number) {
+    return await this.newsService.findOne(id);
   }
 
   @Get()
   @Render('news-list')
-  getAllViews() {
-    const news = this.newsService.findAll();
+  async getAllViews() {
+    const news = await this.newsService.findAll();
 
     return { news, title: 'Список новостей' };
   }
 
   @Get(':id/detail')
   @Render('news-detail')
-  getView(@Param('id') id: string) {
-    const news = this.newsService.findOne(id);
-    let comments = this.commentsService.findAll(id);
-
-    if (!Array.isArray(comments)) {
-      comments = [];
-    }
+  async getView(@Param('id', ParseIntPipe) id: number) {
+    const news = await this.newsService.findOne(id);
+    const comments = await this.commentsService.findAll(id);
 
     return { news, comments };
   }
@@ -79,8 +102,8 @@ export class NewsController {
 
   @Get(':id/edit')
   @Render('edit-news')
-  getEditView(@Param('id') id: string) {
-    const news = this.newsService.findOne(id);
+  async getEditView(@Param('id', ParseIntPipe) id: number) {
+    const news = await this.newsService.findOne(id);
 
     return { news };
   }
@@ -101,7 +124,7 @@ export class NewsController {
   ) {
     const coverPath = cover?.filename ? PATH_NEWS + cover.filename : '';
 
-    const newNews = this.newsService.create({
+    const newNews = await this.newsService.create({
       ...news,
       cover: coverPath,
     });
@@ -122,7 +145,7 @@ export class NewsController {
     }),
   )
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateNewsDto: UpdateNewsDto,
     @UploadedFile() cover: Express.Multer.File,
   ) {
@@ -130,21 +153,9 @@ export class NewsController {
 
     if (cover?.filename) data.cover = PATH_NEWS + cover.filename;
 
-    const oldNews = this.newsService.findOne(id);
-    const updatedNews = this.newsService.update(id, data);
-    const dataForEmail: Partial<News> = {};
-
-    for (const key in updatedNews) {
-      const newValue = updatedNews[key];
-      const oldValue = oldNews[key];
-
-      if (newValue !== oldValue) {
-        dataForEmail[`new-${key}`] = newValue;
-        dataForEmail[`old-${key}`] = oldValue;
-      }
-    }
-
-    dataForEmail.id = updatedNews.id;
+    const oldNews = await this.newsService.findOne(id);
+    const updatedNews = await this.newsService.update(id, data);
+    const dataForEmail = createDataForMail(oldNews, updatedNews);
 
     await this.mailService.sendUpdatedNewsForAdmins(
       adminMails,
@@ -156,7 +167,7 @@ export class NewsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.newsService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return await this.newsService.remove(id);
   }
 }
