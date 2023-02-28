@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Render,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -23,16 +24,16 @@ helperFileLoad.path = PATH_AVATAR;
 
 @Controller('users')
 export class UsersController {
-  constructor(private userService: UsersService) {}
+  constructor(private usersService: UsersService) {}
 
   @Get()
   async getAll() {
-    return await this.userService.findAll();
+    return await this.usersService.findAll();
   }
 
   @Get(':id')
   async get(@Param('id', ParseIntPipe) id: number) {
-    return await this.userService.findById(id);
+    return await this.usersService.findById(id);
   }
 
   @Post()
@@ -49,12 +50,20 @@ export class UsersController {
     @UploadedFile() avatar: Express.Multer.File,
   ) {
     const avatarPath = avatar?.filename ? PATH_AVATAR + avatar.filename : '';
-    const newUser = await this.userService.create({
+    const newUser = await this.usersService.create({
       ...createUserDto,
       avatar: avatarPath,
     });
 
     return `Пользователь с именем ${newUser.nickName} создан.`;
+  }
+
+  @Render('edit-user')
+  @Get(':id/edit')
+  async getEditView(@Param('id', ParseIntPipe) id: number) {
+    const user = await this.usersService.findById(id);
+
+    return { user };
   }
 
   @UseInterceptors(
@@ -67,7 +76,7 @@ export class UsersController {
   )
   @Patch(':id')
   async update(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() avatar: Express.Multer.File,
   ) {
@@ -76,11 +85,11 @@ export class UsersController {
       ? { ...updateUserDto, avatar: avatarPath }
       : { ...updateUserDto };
 
-    return await this.userService.update(id, data);
+    return await this.usersService.update(id, data);
   }
 
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
-    return await this.userService.remove(id);
+    return await this.usersService.remove(id);
   }
 }
