@@ -35,8 +35,12 @@
     }
 
     if (validate()) {
-      const response = await fetch(`/users/${userId}`, {
+      const response = await fetch('/users/', {
         method: 'PATCH',
+        headers: {
+          // Пока что токен передается вручную
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjc3NjIwNjcxLCJleHAiOjE2Nzc2MjQyNzF9.kWENr3-LQb6DGSYJEgsT8w4zMPTe4vUx1Ev544FxzRM'
+        },
         body: data
       });
 

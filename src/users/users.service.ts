@@ -1,5 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Role } from 'src/auth/roles/roles.enum';
 import { hash } from 'src/utils/crypto';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user-dto';
@@ -57,11 +58,14 @@ export class UsersService {
     updateUserDto: UpdateUserDto,
   ): Promise<Partial<UsersEntity>> {
     const user = await this.findById(id);
-
     const data = { ...updateUserDto };
 
     if (data.password) {
       data.password = await hash(data.password);
+    }
+
+    if (data.roles && data.roles !== Role.Admin) {
+      delete data.roles;
     }
 
     const updatedUser = {
