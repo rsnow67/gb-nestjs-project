@@ -2,7 +2,7 @@ import { RolesGuard } from './roles/roles.guard';
 import { jwtConstants } from './constants';
 import { UsersModule } from 'src/users/users.module';
 import { LocalStrategy } from './local.straregy';
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { PassportModule } from '@nestjs/passport';
@@ -13,7 +13,7 @@ import { APP_GUARD } from '@nestjs/core';
 @Module({
   controllers: [AuthController],
   imports: [
-    UsersModule,
+    forwardRef(() => UsersModule),
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,

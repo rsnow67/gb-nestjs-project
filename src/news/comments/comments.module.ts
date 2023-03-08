@@ -1,3 +1,5 @@
+import { AuthModule } from './../../auth/auth.module';
+import { SocketCommentsGateway } from './sockets-comments.gateway';
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
@@ -8,12 +10,13 @@ import { CommentsService } from './comments.service';
 
 @Module({
   controllers: [CommentsController],
-  providers: [CommentsService],
+  providers: [CommentsService, SocketCommentsGateway],
   exports: [CommentsService],
   imports: [
     TypeOrmModule.forFeature([CommentsEntity]),
     forwardRef(() => NewsModule),
     UsersModule,
+    AuthModule,
   ],
 })
 export class CommentsModule {}

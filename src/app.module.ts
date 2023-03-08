@@ -9,12 +9,14 @@ import { MailModule } from './mail/mail.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
+    EventEmitterModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',

@@ -37,4 +37,8 @@ export class AuthService {
   async verify(token: string): Promise<any> {
     return this.jwtService.verify(token);
   }
+
+  async decode(token: string) {
+    return this.jwtService.decode(token);
+  }
 }

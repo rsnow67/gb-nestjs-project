@@ -1,3 +1,4 @@
+import { JwtAuthGuard } from './../../auth/jwt-auth.guard';
 import {
   Body,
   Controller,
@@ -7,12 +8,9 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UploadedFile,
-  UseInterceptors,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import imageFileFilter from 'src/utils/file-filters';
 import { HelperFileLoad } from 'src/utils/HelperFileLoad';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment-dto';
@@ -36,44 +34,27 @@ export class CommentsController {
     return this.commentsService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':newsId')
   createComment(
     @Param('newsId', ParseIntPipe) newsId: number,
     @Body() createCommentDto: CreateCommentDto,
+    @Req() req,
   ) {
-    return this.commentsService.create(newsId, createCommentDto);
+    const { message } = createCommentDto;
+    const jWtUserId = req.user.userId;
+
+    return this.commentsService.create(newsId, message, jWtUserId);
   }
-
-  // @Post(':newsId/:commentId')
-  // @UseInterceptors(
-  //   FileInterceptor('avatar', {
-  //     storage: diskStorage({
-  //       destination: helperFileLoad.destinationPath.bind(helperFileLoad),
-  //       filename: helperFileLoad.customFileName.bind(helperFileLoad),
-  //     }),
-  //     fileFilter: imageFileFilter,
-  //   }),
-  // )
-  // createReply(
-  //   @Param('newsId', ParseIntPipe) newsId: number,
-  //   @Param('commentId', ParseIntPipe) commentId: number,
-  //   @Body() createCommentDto: CreateCommentDto,
-  //   @UploadedFile() avatar: Express.Multer.File,
-  // ): string {
-  //   const avatarPath = avatar?.filename ? PATH_AVATAR + avatar.filename : '';
-
-  //   return this.commentsService.createReply(newsId, commentId, {
-  //     ...createCommentDto,
-  //     avatar: avatarPath,
-  //   });
-  // }
 
   @Patch(':newsId/:id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCommentDto: UpdateCommentDto,
   ) {
-    return this.commentsService.update(id, updateCommentDto);
+    const { message } = updateCommentDto;
+
+    return this.commentsService.update(id, message);
   }
 
   @Delete(':newsId')
