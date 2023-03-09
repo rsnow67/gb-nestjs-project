@@ -1,0 +1,38 @@
+<main class="app__main main">
+  <section class="login">
+    <form class="login-form login__form">
+      <div class="login-form__inner">
+        <h2 class="login-form__title title title_bordered">Авторизация</h2>
+        <fieldset class="login-form__input fieldset">
+          <legend class="fieldset__legend">
+            Логин
+          </legend>
+          <input class="fieldset__input" required type="text"></input>
+        </fieldset>
+        <fieldset class="login-form__input fieldset">
+          <legend class="fieldset__legend">
+            Пароль
+          </legend>
+          <input class="fieldset__input" required type="text"></input>
+        </fieldset>
+        <button class="login-form__button form-button" type="submit" onclick="sendForm()">
+          Войти
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script>
+  function sendForm() {
+    axios({
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      data: {username: $('#username')[0].value, password: $('#password')[0].value},
+      url: '/auth/login',
+    }).then((data) => {
+    })
+  }
+</script>
