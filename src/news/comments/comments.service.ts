@@ -61,14 +61,16 @@ export class CommentsService {
     return this.commentsRepository.save(comment);
   }
 
-  async update(id: number, message: string): Promise<CommentsEntity> {
+  async update(id: number, text: string): Promise<CommentsEntity> {
     const comment = await this.findOne(id);
     const updatedComment = {
       ...comment,
-      message,
+      text,
     };
 
     this.commentsRepository.save(updatedComment);
+
+    this.eventEmitter.emit('comment.update', { updatedComment });
 
     return updatedComment;
   }

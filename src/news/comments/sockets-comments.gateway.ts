@@ -12,7 +12,7 @@ import { Server, Socket } from 'socket.io';
 import { WsJwtGuard } from 'src/auth/ws-jwt.guard';
 import { CommentsService } from './comments.service';
 
-export type Comment = { message: string; newsId: number };
+export type Comment = { text: string; newsId: number };
 
 @WebSocketGateway()
 export class SocketCommentsGateway
@@ -26,11 +26,20 @@ export class SocketCommentsGateway
   @UseGuards(WsJwtGuard)
   @SubscribeMessage('addComment')
   async handleMessage(client: Socket, comment: Comment) {
-    const { newsId, message } = comment;
+    const { newsId, text } = comment;
     const userId: number = client.data.user.id;
-    const _comment = await this.commentsService.create(newsId, message, userId);
+    const _comment = await this.commentsService.create(newsId, text, userId);
 
     this.server.to(newsId.toString()).emit('newComment', _comment);
+  }
+
+  @OnEvent('comment.update')
+  handleUpdateCommentEvent(payload) {
+    const { updatedComment } = payload;
+
+    this.server
+      .to(updatedComment.news.id.toString())
+      .emit('updateComment', { updatedComment });
   }
 
   @OnEvent('comment.remove')

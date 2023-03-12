@@ -41,10 +41,10 @@ export class CommentsController {
     @Body() createCommentDto: CreateCommentDto,
     @Req() req,
   ) {
-    const { message } = createCommentDto;
+    const { text } = createCommentDto;
     const jWtUserId = req.user.userId;
 
-    return this.commentsService.create(newsId, message, jWtUserId);
+    return this.commentsService.create(newsId, text, jWtUserId);
   }
 
   @Patch(':newsId/:id')
@@ -52,9 +52,9 @@ export class CommentsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCommentDto: UpdateCommentDto,
   ) {
-    const { message } = updateCommentDto;
+    const { text } = updateCommentDto;
 
-    return this.commentsService.update(id, message);
+    return this.commentsService.update(id, text);
   }
 
   @Delete(':newsId')
