@@ -8,7 +8,10 @@ export class WsJwtGuard implements CanActivate {
   async canActivate(context: ExecutionContext) {
     try {
       const client = context.switchToWs().getClient();
-      const authToken = client.handshake.headers.authorization.split(' ')[1];
+      const cookies: string[] = client.handshake.headers.cookie.split('; ');
+      const authToken = cookies
+        .find((cookie) => cookie.startsWith('jwt'))
+        .split('=')[1];
       const isAuth = await this.authService.verify(authToken);
 
       if (isAuth) {

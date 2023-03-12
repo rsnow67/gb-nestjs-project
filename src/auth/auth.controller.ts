@@ -6,6 +6,7 @@ import {
   Post,
   Render,
   Request,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 
@@ -15,11 +16,16 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  async login(@Request() req, @Res({ passthrough: true }) res) {
+    const { access_token, userId } = await this.authService.login(req.user);
+
+    res.cookie('jwt', access_token, { httpOnly: true });
+    res.cookie('userId', userId);
+
+    return access_token;
   }
 
-  @Get()
+  @Get('login')
   @Render('auth/login')
   async render() {
     return { layout: 'auth', title: 'Авторизация' };

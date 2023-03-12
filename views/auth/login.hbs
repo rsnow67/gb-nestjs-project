@@ -4,18 +4,18 @@
       <div class="login-form__inner">
         <h2 class="login-form__title title title_bordered">Авторизация</h2>
         <fieldset class="login-form__input fieldset">
-          <legend class="fieldset__legend">
+          <legend class="fieldset__legend" for="usernameInput">
             Логин
           </legend>
-          <input class="fieldset__input" required type="text"></input>
+          <input class="fieldset__input" required type="email" name="username" id="usernameInput"></input>
         </fieldset>
         <fieldset class="login-form__input fieldset">
-          <legend class="fieldset__legend">
+          <legend class="fieldset__legend" for="passwordInput">
             Пароль
           </legend>
-          <input class="fieldset__input" required type="text"></input>
+          <input class="fieldset__input" required type="text" name="password" id="passwordInput"></input>
         </fieldset>
-        <button class="login-form__button form-button" type="submit" onclick="sendForm()">
+        <button class="login-form__button form-button" type="submit">
           Войти
         </button>
       </div>
@@ -24,15 +24,25 @@
 </main>
 
 <script>
-  function sendForm() {
-    axios({
+  const form = document.querySelector('.login-form');
+
+  async function handleForm(e) {
+    e.preventDefault();
+
+    const data = new FormData(form);
+
+    const response = await fetch('/auth/login', {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
       },
-      data: {username: $('#username')[0].value, password: $('#password')[0].value},
-      url: '/auth/login',
-    }).then((data) => {
-    })
+      body: JSON.stringify(Object.fromEntries(data)),
+    });
+
+    if (response.ok) {
+      window.location.href = `/news/`;
+    }
   }
+
+  form.addEventListener('submit', handleForm);
 </script>
