@@ -36,7 +36,7 @@ export class CommentsController {
 
   @UseGuards(JwtAuthGuard)
   @Post(':newsId')
-  createComment(
+  create(
     @Param('newsId', ParseIntPipe) newsId: number,
     @Body() createCommentDto: CreateCommentDto,
     @Req() req,
@@ -57,12 +57,7 @@ export class CommentsController {
     return this.commentsService.update(id, text);
   }
 
-  @Delete(':newsId')
-  removeAll(@Param('newsId', ParseIntPipe) newsId: number) {
-    return this.commentsService.removeAll(newsId);
-  }
-
-  @Delete(':newsId/:id')
+  @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.commentsService.remove(id);
   }
