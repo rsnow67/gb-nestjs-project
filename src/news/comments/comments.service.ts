@@ -5,6 +5,10 @@ import { Repository } from 'typeorm';
 import { NewsService } from '../news.service';
 import { UsersService } from 'src/users/users.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  checkPermission,
+  Modules,
+} from 'src/auth/roles/utils/check-permission';
 
 @Injectable()
 export class CommentsService {
@@ -83,8 +87,16 @@ export class CommentsService {
     return 'Комментарии удалены.';
   }
 
-  async remove(id: number): Promise<string> {
+  async remove(id: number, userId: number): Promise<string> {
     const comment = await this.findOne(id);
+    const user = await this.usersService.findById(userId);
+
+    if (
+      user.id !== comment.user.id &&
+      !checkPermission(Modules.removeComment, user.roles)
+    ) {
+      throw new HttpException('Недостаточно прав для удаления.', 403);
+    }
 
     this.commentsRepository.remove(comment);
 

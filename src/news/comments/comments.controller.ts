@@ -57,8 +57,9 @@ export class CommentsController {
     return this.commentsService.update(id, text);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.commentsService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.commentsService.remove(id, req.user.userId);
   }
 }

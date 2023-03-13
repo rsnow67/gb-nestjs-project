@@ -94,6 +94,7 @@ class Comments extends React.Component {
 
     this.state = {
       comments: [],
+      currentUser: null,
       message: '',
       editableCommentId: null,
     };
@@ -121,6 +122,17 @@ class Comments extends React.Component {
 
   componentDidMount() {
     this.getAllComments();
+
+    const currentUserId = Number(getCookie('userId'));
+    this.getUser(currentUserId);
+
+    cookieStore.addEventListener('change', ({ changed }) => {
+      for (const { name, value } of changed) {
+        if (name === 'userId') {
+          this.getUser(Number(value));
+        }
+      }
+    });
 
     this.socket.on('newComment', (comment) => {
       this.setState((prevState) => ({
@@ -163,6 +175,18 @@ class Comments extends React.Component {
     }
   };
 
+  getUser = async (userId) => {
+    const response = await fetch(`${API}/users/${userId}`, {
+      method: 'GET',
+    });
+
+    if (response.ok) {
+      const user = await response.json();
+
+      this.setState({ currentUser: user });
+    }
+  };
+
   handleRemoveClick = (id) => {
     fetch(`${API}/comments/${id}`, { method: 'DELETE' });
   };
@@ -190,23 +214,33 @@ class Comments extends React.Component {
   }
 
   renderComments() {
-    const currentUserId = Number(getCookie('userId'));
+    const { comments, currentUser = {}, editableCommentId } = this.state;
 
-    return this.state.comments.map((comment) => {
+    return comments.map((comment) => {
       const {
         createdAt,
         updatedAt,
-        id,
+        id: commentId,
         user: { avatar, nickName, id: userId },
         text,
       } = comment;
 
       const createdAtDate = new Date(createdAt);
-      const isCommentUpdated = comment.createdAt !== updatedAt;
+      const isCommentUpdated = createdAt !== updatedAt;
       const updatedAtDate = isCommentUpdated ? new Date(updatedAt) : null;
 
+      const showEditButton =
+        currentUser &&
+        userId === currentUser.id &&
+        editableCommentId !== commentId;
+
+      const showRemoveButton =
+        currentUser &&
+        (userId === currentUser.id || currentUser.roles === 'admin') &&
+        editableCommentId !== commentId;
+
       return (
-        <li key={id} className="mb-3 mt-4" style={styles.comment}>
+        <li key={commentId} className="mb-3 mt-4" style={styles.comment}>
           <div style={styles.commentWrapper}>
             {avatar ? (
               <img src={avatar} alt="user-avatar" style={styles.avatar} />
@@ -222,7 +256,7 @@ class Comments extends React.Component {
                 </p>
               ) : null}
             </div>
-            {userId === currentUserId && this.state.editableCommentId !== id ? (
+            {showEditButton ? (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -231,25 +265,25 @@ class Comments extends React.Component {
                 className="bi bi-pencil"
                 viewBox="0 0 16 16"
                 style={styles.startEditButton}
-                onClick={() => this.handleSetEditableCommentId(id)}
+                onClick={() => this.handleSetEditableCommentId(commentId)}
               >
                 <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" />
               </svg>
             ) : null}
-            {userId === currentUserId && this.state.editableCommentId !== id ? (
+            {showRemoveButton ? (
               <button
                 type="button"
                 className="btn-close"
                 aria-label="Close"
                 style={styles.removeButton}
-                onClick={() => this.handleRemoveClick(id)}
+                onClick={() => this.handleRemoveClick(commentId)}
               ></button>
             ) : null}
           </div>
-          {this.state.editableCommentId === id ? (
+          {editableCommentId === commentId ? (
             <EditCommentForm
               defaultValue={text}
-              commentId={id}
+              commentId={commentId}
               onSetEditableCommentId={this.handleSetEditableCommentId}
             />
           ) : (
@@ -261,12 +295,12 @@ class Comments extends React.Component {
   }
 
   render() {
+    const { comments, message } = this.state;
+
     return (
       <div style={styles.commentsWrapper}>
-        <h5>Комментарии:{this.state.comments.length}</h5>
-        {this.state.comments.length > 0
-          ? this.renderComments()
-          : this.renderEmptyList()}
+        <h5>Комментарии:{comments.length}</h5>
+        {comments.length > 0 ? this.renderComments() : this.renderEmptyList()}
         <form
           className="mt-4"
           id="create-comment-form"
@@ -279,7 +313,7 @@ class Comments extends React.Component {
             rows="3"
             placeholder="Написать комментарий"
             required
-            value={this.state.message}
+            value={message}
             onChange={this.handleChange}
           ></textarea>
           <button
@@ -298,7 +332,6 @@ class Comments extends React.Component {
 class EditCommentForm extends React.Component {
   constructor(props) {
     super(props);
-    console.log('props.defaultValue', props.defaultValue);
 
     this.state = {
       message: props.defaultValue,
@@ -310,7 +343,9 @@ class EditCommentForm extends React.Component {
   };
 
   handleSubmit = async () => {
-    if (this.state.message.length === 0) {
+    const { message } = this.state;
+
+    if (message.length === 0) {
       return;
     }
 
@@ -319,7 +354,7 @@ class EditCommentForm extends React.Component {
       headers: {
         'content-type': 'application/json',
       },
-      body: JSON.stringify({ text: this.state.message }),
+      body: JSON.stringify({ text: message }),
     });
 
     if (response.ok) {
