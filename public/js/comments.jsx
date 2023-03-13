@@ -25,6 +25,7 @@ const deafultAvatar = {
 };
 
 const commentInfoInner = {
+  maxWidth: '450px',
   display: 'flex',
   flexDirection: 'column',
 };
@@ -34,11 +35,34 @@ const date = {
   fontSize: '12px',
 };
 
+const startEditButton = {
+  position: 'absolute',
+  right: 40,
+  fill: '#000',
+  cursor: 'pointer',
+};
+
 const removeButton = {
   position: 'absolute',
   right: 0,
   width: '0.5em',
   height: '0.5em',
+};
+
+const editForm = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  justifyContent: 'flex-end',
+};
+
+const updateButton = {
+  marginRight: '10px',
+};
+
+const createForm = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-end',
 };
 
 const styles = {
@@ -49,7 +73,11 @@ const styles = {
   deafultAvatar,
   commentInfoInner,
   date,
+  startEditButton,
   removeButton,
+  editForm,
+  updateButton,
+  createForm,
 };
 
 function getCookie(name) {
@@ -67,6 +95,7 @@ class Comments extends React.Component {
     this.state = {
       comments: [],
       message: '',
+      editableCommentId: null,
     };
 
     this.newsId = parseInt(window.location.href.split('/').reverse()[1]);
@@ -84,6 +113,8 @@ class Comments extends React.Component {
       },
     });
 
+    this.handleSetEditableCommentId =
+      this.handleSetEditableCommentId.bind(this);
     this.renderComments = this.renderComments.bind(this);
     this.renderEmptyList = this.renderEmptyList.bind(this);
   }
@@ -132,13 +163,12 @@ class Comments extends React.Component {
     }
   };
 
-  handleChange = (e) => {
-    this.setState({ message: e.target.value });
+  handleRemoveClick = (id) => {
+    fetch(`${API}/comments/${id}`, { method: 'DELETE' });
   };
 
-  handleRemoveClick = (id) => {
-    console.log('id', id);
-    fetch(`${API}/comments/${id}`, { method: 'DELETE' });
+  handleChange = (e) => {
+    this.setState({ message: e.target.value });
   };
 
   handleSubmit = () => {
@@ -147,6 +177,10 @@ class Comments extends React.Component {
       text: this.state.message,
     });
     this.setState({ message: '' });
+  };
+
+  handleSetEditableCommentId = (id) => {
+    this.setState({ editableCommentId: id });
   };
 
   renderEmptyList() {
@@ -188,7 +222,21 @@ class Comments extends React.Component {
                 </p>
               ) : null}
             </div>
-            {userId === currentUserId ? (
+            {userId === currentUserId && this.state.editableCommentId !== id ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                className="bi bi-pencil"
+                viewBox="0 0 16 16"
+                style={styles.startEditButton}
+                onClick={() => this.handleSetEditableCommentId(id)}
+              >
+                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" />
+              </svg>
+            ) : null}
+            {userId === currentUserId && this.state.editableCommentId !== id ? (
               <button
                 type="button"
                 className="btn-close"
@@ -198,7 +246,15 @@ class Comments extends React.Component {
               ></button>
             ) : null}
           </div>
-          <p>{text}</p>
+          {this.state.editableCommentId === id ? (
+            <EditCommentForm
+              defaultValue={text}
+              commentId={id}
+              onSetEditableCommentId={this.handleSetEditableCommentId}
+            />
+          ) : (
+            <p>{text}</p>
+          )}
         </li>
       );
     });
@@ -211,7 +267,11 @@ class Comments extends React.Component {
         {this.state.comments.length > 0
           ? this.renderComments()
           : this.renderEmptyList()}
-        <form className="mt-4" id="create-comment-form">
+        <form
+          className="mt-4"
+          id="create-comment-form"
+          style={styles.createForm}
+        >
           <textarea
             className="form-control"
             name="text"
@@ -231,6 +291,75 @@ class Comments extends React.Component {
           </button>
         </form>
       </div>
+    );
+  }
+}
+
+class EditCommentForm extends React.Component {
+  constructor(props) {
+    super(props);
+    console.log('props.defaultValue', props.defaultValue);
+
+    this.state = {
+      message: props.defaultValue,
+    };
+  }
+
+  handleChange = (e) => {
+    this.setState({ message: e.target.value });
+  };
+
+  handleSubmit = async () => {
+    if (this.state.message.length === 0) {
+      return;
+    }
+
+    const response = await fetch(`${API}/comments/${this.props.commentId}`, {
+      method: 'PATCH',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ text: this.state.message }),
+    });
+
+    if (response.ok) {
+      this.handleCloseForm();
+    }
+  };
+
+  handleCloseForm = () => {
+    this.props.onSetEditableCommentId(null);
+  };
+
+  render() {
+    return (
+      <form className="mt-4" id="edit-comment-form" style={styles.editForm}>
+        <textarea
+          className="form-control"
+          name="message"
+          id="messageInput"
+          rows="3"
+          placeholder="Написать комментарий"
+          required
+          value={this.state.message}
+          onChange={this.handleChange}
+        ></textarea>
+        <button
+          className="btn btn-primary mt-3"
+          type="button"
+          onClick={this.handleSubmit}
+          style={styles.updateButton}
+        >
+          Сохранить
+        </button>
+        <button
+          className="btn btn-primary mt-3"
+          type="button"
+          onClick={this.handleCloseForm}
+        >
+          Отменить
+        </button>
+      </form>
     );
   }
 }

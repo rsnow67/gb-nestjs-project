@@ -47,7 +47,7 @@ export class CommentsController {
     return this.commentsService.create(newsId, text, jWtUserId);
   }
 
-  @Patch(':newsId/:id')
+  @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCommentDto: UpdateCommentDto,
