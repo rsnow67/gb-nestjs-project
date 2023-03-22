@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateNewsDto } from './dto/create-news-dto';
 import { UpdateNewsDto } from './dto/update-news-dto';
 import { Repository } from 'typeorm';
@@ -53,7 +53,13 @@ export class NewsService {
     });
 
     if (!news) {
-      throw new HttpException('Новость не найдена.', 500);
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'The news is not found.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     return news;
@@ -75,6 +81,6 @@ export class NewsService {
     const news = await this.findOne(id);
     this.newsRepository.remove(news);
 
-    return 'Новость удалена.';
+    return 'The news has been removed.';
   }
 }

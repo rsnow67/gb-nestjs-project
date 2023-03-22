@@ -1,5 +1,5 @@
 import { checkPermission } from './../auth/roles/utils/check-permission';
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Modules } from 'src/auth/roles/utils/check-permission';
 import { hash } from 'src/utils/crypto';
@@ -23,7 +23,13 @@ export class UsersService {
     const user = await this.usersRepository.findOneBy({ id });
 
     if (!user) {
-      throw new HttpException('Пользователь не найден.', 500);
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'The user is not found.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     return user;
@@ -33,7 +39,13 @@ export class UsersService {
     const user = await this.usersRepository.findOneBy({ email });
 
     if (!user) {
-      throw new HttpException('Пользователь не найден.', 500);
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'The user is not found.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     return user;
@@ -86,6 +98,6 @@ export class UsersService {
 
     this.usersRepository.remove(user);
 
-    return `Пользователь ${user.nickName} удален.`;
+    return `The user ${user.nickName} has been removed.`;
   }
 }
