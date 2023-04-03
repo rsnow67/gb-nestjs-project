@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommentsEntity } from './comments.entity';
 import { Repository } from 'typeorm';
@@ -43,7 +43,13 @@ export class CommentsService {
     });
 
     if (!comment) {
-      throw new HttpException('Комментарий не найден.', 500);
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'The comment is not found.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     return comment;
@@ -84,7 +90,7 @@ export class CommentsService {
 
     this.commentsRepository.remove(comments);
 
-    return 'Комментарии удалены.';
+    return 'The comments have been removed.';
   }
 
   async remove(id: number, userId: number): Promise<string> {
@@ -95,7 +101,13 @@ export class CommentsService {
       user.id !== comment.user.id &&
       !checkPermission(Modules.removeComment, user.roles)
     ) {
-      throw new HttpException('Недостаточно прав для удаления.', 403);
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: 'You do not have sufficient rights to delete.',
+        },
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     this.commentsRepository.remove(comment);
@@ -105,6 +117,6 @@ export class CommentsService {
       newsId: comment.news.id,
     });
 
-    return 'Комментарий удален.';
+    return 'The comments has been removed.';
   }
 }

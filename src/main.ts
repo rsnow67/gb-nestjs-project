@@ -18,8 +18,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('News swagger')
-    .setDescription('The news API')
+    .setTitle('News API')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
@@ -38,7 +37,7 @@ async function bootstrap() {
   hbs.registerPartials(__dirname + '/views/partials');
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.use(cookieParser());
-
+  app.enableCors();
   await app.listen(3000);
 }
 
