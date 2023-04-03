@@ -1,11 +1,14 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { CreateCommentDto } from './dto/create-comment-dto';
-import { UpdateCommentDto } from './dto/update-comment-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommentsEntity } from './comments.entity';
 import { Repository } from 'typeorm';
 import { NewsService } from '../news.service';
 import { UsersService } from 'src/users/users.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  checkPermission,
+  Modules,
+} from 'src/auth/roles/utils/check-permission';
 
 @Injectable()
 export class CommentsService {
@@ -14,6 +17,7 @@ export class CommentsService {
     private commentsRepository: Repository<CommentsEntity>,
     private newsService: NewsService,
     private usersService: UsersService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(newsId: number): Promise<CommentsEntity[]> {
@@ -24,6 +28,9 @@ export class CommentsService {
         },
       },
       relations: ['user', 'news'],
+      order: {
+        createdAt: 'ASC',
+      },
     });
   }
 
@@ -44,13 +51,13 @@ export class CommentsService {
 
   async create(
     newsId: number,
-    createCommentDto: CreateCommentDto,
+    message: string,
+    userId: number,
   ): Promise<CommentsEntity> {
-    const { userId, text } = createCommentDto;
     const news = await this.newsService.findOne(newsId);
     const user = await this.usersService.findById(userId);
     const comment = {
-      text,
+      text: message,
       news,
       user,
     };
@@ -58,17 +65,16 @@ export class CommentsService {
     return this.commentsRepository.save(comment);
   }
 
-  async update(
-    id: number,
-    updateCommentDto: UpdateCommentDto,
-  ): Promise<CommentsEntity> {
+  async update(id: number, text: string): Promise<CommentsEntity> {
     const comment = await this.findOne(id);
     const updatedComment = {
       ...comment,
-      ...updateCommentDto,
+      text,
     };
 
     this.commentsRepository.save(updatedComment);
+
+    this.eventEmitter.emit('comment.update', { updatedComment });
 
     return updatedComment;
   }
@@ -81,10 +87,23 @@ export class CommentsService {
     return 'Комментарии удалены.';
   }
 
-  async remove(id: number): Promise<string> {
+  async remove(id: number, userId: number): Promise<string> {
     const comment = await this.findOne(id);
+    const user = await this.usersService.findById(userId);
+
+    if (
+      user.id !== comment.user.id &&
+      !checkPermission(Modules.removeComment, user.roles)
+    ) {
+      throw new HttpException('Недостаточно прав для удаления.', 403);
+    }
 
     this.commentsRepository.remove(comment);
+
+    this.eventEmitter.emit('comment.remove', {
+      commentId: id,
+      newsId: comment.news.id,
+    });
 
     return 'Комментарий удален.';
   }
