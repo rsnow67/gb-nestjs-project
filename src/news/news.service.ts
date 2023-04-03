@@ -18,7 +18,7 @@ export class NewsService {
     const { userId, ...newsData } = createNewsDto;
     const newNews = {
       ...newsData,
-      user: await this.usersService.findOne(parseInt(userId)),
+      user: await this.usersService.findById(parseInt(userId)),
     };
 
     return this.newsRepository.save(newNews);

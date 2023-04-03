@@ -1,0 +1,98 @@
+<h1 class="mb-4">Редактирование профиля</h1>
+<form id="edit-user-form" style="max-width: 600px; ">
+  <div class="mb-3">
+    <label for="nickNameInput" class="form-label">Отображаемое имя</label>
+    <input id="nickNameInput" class="form-control" type="text" name="nickName" value="{{user.nickName}}" maxlength="30" required>
+  </div>
+  <div class="mb-3">
+    <label for="emailInput" class="form-label">Адрес почты</label>
+    <input type="email" class="form-control" name="email" id="emailInput" value="{{user.email}}" required>
+  </div>
+  <h5>Аватар</h5>
+  <img id="avatar" src="{{user.avatar}}" alt="avatar" style="width: 200px; height: auto; " />
+  <div class="form-group mb-3" style="display: flex; flex-direction: column; ">
+    <label class="mr-3" for="avatarInput">Загрузите новый аватар</label>
+    <input type="file" accept="image/*" class="form-control-file" name="avatar" id="avatarInput">
+  </div>
+  <div class="mb-3">
+    <label for="passwordInput" class="form-label">Новый пароль</label>
+    <input class="form-control" name="password" id="passwordInput" value="{{user.password}}">
+  </div>
+  <button class="btn btn-primary" type="button" onclick="sendForm()">Сохранить</button>
+</form>
+<script>
+  const nickNameInputOld = document.forms['edit-user-form']['nickName'].value;
+  const emailInputOld = document.forms['edit-user-form']['email'].value;
+  const passwordInputOld = document.forms['edit-user-form']['password'].value;
+
+  async function sendForm() {
+    const form = document.getElementById('edit-user-form');
+    const data = new FormData(form);
+    const userId = window.location.pathname.split('/').at(-2);
+
+    if (data.get('password') === '') {
+      data.delete('password');
+    }
+
+    if (validate()) {
+      const response = await fetch('/users/', {
+        method: 'PATCH',
+        headers: {
+          // Пока что токен передается вручную
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjc3NjIwNjcxLCJleHAiOjE2Nzc2MjQyNzF9.kWENr3-LQb6DGSYJEgsT8w4zMPTe4vUx1Ev544FxzRM'
+        },
+        body: data
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        window.location.reload();
+        alert('Профиль сохранен.');
+      } else {
+        alert('Ошибка при сохранении профиля.')
+      }
+    }
+  }
+
+  function validate() {
+    const nickNameInput = document.forms['edit-user-form']['nickName'].value;
+    const emailInput = document.forms['edit-user-form']['email'].value;
+    const passwordInput = document.forms['edit-user-form']['password'].value;
+    const avatarInput = document.forms['edit-user-form']['avatar'].value;
+
+    if (nickNameInput === nickNameInputOld
+      && emailInput === emailInputOld
+      && passwordInput === passwordInputOld
+      && !avatarInput) {
+      alert('Для сохранения профиля нужно изменить хотя бы один параметр.');
+      return false;
+    }
+
+    return true;
+  }
+</script>
+<script>
+  const fileReader = new FileReader();
+  const imageInput = document.getElementById('avatarInput');
+  const image = document.getElementById('avatar');
+
+  imageInput.addEventListener('change', (e) => {
+    const target = e.target;
+
+    if (!FileReader) {
+      console.log('FileReader не поддерживается');
+      return;
+    }
+
+    if (target.files.length === 0) {
+      console.log('Ничего не загружено');
+      return;
+    }
+
+
+    fileReader.onload = () => {
+      image.src = fileReader.result;
+    }
+
+    fileReader.readAsDataURL(target.files[0]);
+  })
+</script>

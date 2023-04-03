@@ -1,3 +1,4 @@
+import { JwtAuthGuard } from './../auth/jwt-auth.guard';
 import {
   Body,
   Controller,
@@ -9,6 +10,7 @@ import {
   Post,
   Render,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -21,6 +23,8 @@ import { HelperFileLoad } from 'src/utils/HelperFileLoad';
 import imageFileFilter from 'src/utils/file-filters';
 import { MailService } from 'src/mail/mail.service';
 import { NewsEntity } from './news.entity';
+import { Roles } from 'src/auth/roles/roles.decorator';
+import { Role } from 'src/auth/roles/roles.enum';
 
 const PATH_NEWS = '/news-static/';
 const helperFileLoad = new HelperFileLoad();
@@ -108,6 +112,8 @@ export class NewsController {
     return { news };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin, Role.Moderator)
   @Post()
   @UseInterceptors(
     FileInterceptor('cover', {
