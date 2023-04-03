@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+
+  <style>
+    body {
+      margin: 0;
+    }
+
+    .app {
+      height: 100vh;
+    }
+
+    .app__main {
+      height: 100%;
+      background-color: #eeedee;
+    }
+
+    .login-form {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin: -191px 0 0 -205px;
+      z-index: 1;
+      width: 345px;
+      min-height: 318px;
+      padding: 32px;
+      background-color: #FFFFFF;
+      box-shadow: 0px 4px 33px rgba(0, 0, 0, 0.04);
+      border-radius: 16px;
+    }
+
+    .login-form__inner {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-form__title {
+      margin: 0 0 32px 0;
+      font-size: 24px;
+      line-height: 28px;
+      font-weight: 500;
+      font-style: normal;
+      color: #424242;
+      text-transform: capitalize;
+      -webkit-text-stroke-width: 1px;
+      -webkit-text-stroke-color: black;
+    }
+
+    .login-form__input {
+      margin: 0 0 24px 0;
+    }
+
+    .login-form__button {
+      margin: 8px 0 0 0;
+    }
+
+    .fieldset {
+      width: 100%;
+      padding: 0;
+      border: 0;
+      font-size: 100%;
+      vertical-align: baseline;
+    }
+
+    .fieldset__legend {
+      margin: 0 0 7px 0;
+      font-size: 16px;
+      line-height: 19px;
+      font-weight: 500;
+      color: #424242;
+    }
+
+    .fieldset__legend_red {
+      color: #EB1717;
+    }
+
+    .fieldset__input {
+      width: 100%;
+      height: 50px;
+      padding: 16px 0 16px 16px;
+      color: #424242;
+      background: #FFFFFF;
+      border: 1px solid #C9CACC;
+      box-sizing: border-box;
+      border-radius: 4px;
+      outline: none;
+      font-size: 16px;
+      line-height: 18px;
+      font-weight: 300;
+    }
+
+    .fieldset__input_red {
+      border: 1px solid #EB1717;
+      color: #EB1717;
+    }
+
+    .fieldset__error {
+      margin: 7px 0;
+      font-size: 12px;
+      line-height: 14px;
+      font-weight: 300;
+      color: #EB1717;
+    }
+
+    .form-button {
+      width: 100%;
+      min-height: 50px;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(104.34deg, #41522E -15.34%, #BE8022 145.95%);
+      box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.15);
+      border-radius: 4px;
+      border: none;
+      font-size: 16px;
+      line-height: 20px;
+      font-weight: 500;
+      color: #FFFFFF;
+    }
+
+    .form-button:hover,
+    .form-button:active {
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    {{{body}}}
+  </main>
+</body>
+
+</html>

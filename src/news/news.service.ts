@@ -27,6 +27,9 @@ export class NewsService {
   findAll(): Promise<NewsEntity[]> {
     return this.newsRepository.find({
       relations: ['user', 'comments', 'comments.user'],
+      order: {
+        createdAt: 'ASC',
+      },
     });
   }
 

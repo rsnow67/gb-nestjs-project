@@ -1,0 +1,49 @@
+<main class="app__main main">
+  <section class="login">
+    <form class="login-form login__form">
+      <div class="login-form__inner">
+        <h2 class="login-form__title title title_bordered">Авторизация</h2>
+        <fieldset class="login-form__input fieldset">
+          <legend class="fieldset__legend" for="usernameInput">
+            Логин
+          </legend>
+          <input class="fieldset__input" required type="email" name="username" id="usernameInput"></input>
+        </fieldset>
+        <fieldset class="login-form__input fieldset">
+          <legend class="fieldset__legend" for="passwordInput">
+            Пароль
+          </legend>
+          <input class="fieldset__input" required type="text" name="password" id="passwordInput"></input>
+        </fieldset>
+        <button class="login-form__button form-button" type="submit">
+          Войти
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script>
+  const form = document.querySelector('.login-form');
+
+  async function handleForm(e) {
+    e.preventDefault();
+
+    const data = new FormData(form);
+
+    const response = await fetch('/auth/login', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(Object.fromEntries(data)),
+    });
+
+    if (response.ok) {
+      form.reset();
+      window.location.href = `/news/`;
+    }
+  }
+
+  form.addEventListener('submit', handleForm);
+</script>
